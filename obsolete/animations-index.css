@@ -1,0 +1,46 @@
+.begin-form {
+  text-align: center;
+  margin-top: 60px;
+}
+.btn-container {
+  text-align: center;
+  margin-top: 45px;
+}
+.btn {
+  text-decoration: none;
+  font-family: 'Roboto';
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 1px;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 20px;
+  display: inline-block;
+  margin-top: 5px;
+}
+.redbtn {
+	background-color: red;
+	color: white;
+}
+.greenbtn {
+	background-color: green;
+	color: white;
+}
+.redbtn-hover {
+  background-color:  #FF6680;
+  color: white;
+}
+.greenbtn-hover {
+	background-color: #50C878;
+	color: white;
+}
+.redbtn-clicked {
+  background:  #FF6680;
+  color: white;
+  border: 3px solid red;
+}
+.greenbtn-clicked {
+	background-color: #50C878;
+	color: white;
+	border: 3px solid green;
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="index.css">
+	<title>Phase Rework</title>
+</head>
+
+<body onload="renderHello()">
+<div class="generic-container">
+	<h2>Enter Production Order Information:</h2>
+	<!--<h2>Which rework function?</h2>
+	<input class="btn redbtn" id="sel-remove" type="submit" value="M9100-11 Remove VFD"/>
+	<input class="btn greenbtn" id="sel-attach" type="submit" value="M9100-10 Attach VFD"/>
+	-->
+	<form id="qty">
+		<h4>
+		<div class="rework-form">
+		<label>P/O Number:</label><input type="text" class="qtys" required>
+		</div>
+		<div class="rework-form">
+		<label>Qty of parts out:</label><input type="number" class="qtys" required minlength="1" maxlength="2" size="3">
+		<label>Qty of parts in:</label><input type="number" class="qtys" required minlength="1" maxlength="2" size="3">
+		</div>
+		<div class="rework-form">
+		<label>Assembly P/N From:</label><input type="text" class="qtys" required>
+		</div>
+		<div class="rework-form">
+		<label>Assembly P/N To:</label><input type="text" class="qtys" required>
+		</div>
+		<div class="rework-form">
+		<label>Date:</label><input type="text" class="qtys" required>
+		</div>
+		</h4>
+	</form>
+</div>
+<div class="specific-container">
+	<form id="input">
+		<h2>Enter Unit Specific Information:</h2>
+		<h4>
+			<div class="rework-form">
+				<label>Assembly Serial Number:</label><input type="text" class="inputs" required>
+			</div>
+			<div class="rework-form">
+				<ol id="parts"></ol>
+			</div>
+		</h4>
+	</form>
+</div>
+<div class="submit">
+	<input id='send' type="submit" value="Submit">
+</div>
+<div id="target"></div>
+
+<script id="list" type="x-tmpl-mustache">{{ name }}</script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/mustache@latest"></script>
+<script src="must.js"></script>
+</body>
+</html>

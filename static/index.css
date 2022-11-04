@@ -1,0 +1,26 @@
+input[type='number']{
+  width: 60px;
+} 
+li {
+  padding: 2px;
+}
+.rework-form {
+  padding: 1px;
+}
+.generic-container {
+  text-align: center;
+  border-style: solid;
+  border-color: brown;
+  border-radius: 3px;
+  border-width: 2px;
+  margin: 15px;
+  padding: 10px;
+}
+.specific-container {
+  border-style: solid;
+  border-color: cornflowerblue;
+  border-radius: 3px;
+  border-width: 2px;
+  margin: 15px;
+  padding: 10px;
+}
