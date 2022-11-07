@@ -4,11 +4,14 @@ const qtyInput = document.getElementById('qty');
 var inputs = document.getElementsByClassName('inputs');
 const qtys = document.getElementsByClassName('qtys');
 var checkForms = document.getElementsByClassName('checkboxes');
+const buttons = document.getElementsByClassName("auto-setup-buttons");
 
 const partOutInputs = `<li>Part Out <div class="checkboxes"> Ignore: <label>PAR S/N:<input type="checkbox"></label> <label>MFGR S/N:<input type="checkbox"></label> <label>MFGR Date Code:<input type="checkbox"></label> </div> <div> <ol> <li> <label>Fru or P/N:<input type="text" class="inputs" required></label> </li> <li> <label>PAR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR P/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR Date Code:<input type="text" class="inputs" required></label> </li> </ol> </div> </li>`;
 const partInInputs = `<li>Part In <div class="checkboxes"> Ignore: <label>PAR S/N:<input type="checkbox"></label> <label>MFGR S/N:<input type="checkbox"></label> <label>MFGR Date Code:<input type="checkbox"></label> </div> <div> <ol> <li> <label>Fru or P/N:<input type="text" class="inputs" required></label> </li> <li> <label>PAR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR P/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR Date Code:<input type="text" class="inputs" required></label> </li> </ol> </div> </li>`;
 
 const assemblyPartNumbers = ['M9100-10','M9100-11','M9110-11','M9110-21'];
+
+const M910010to11 = [1, 1, "M9100-10", "M9100-11", [true, true, true], "980029758", "POS-TGL-BC1", [true, true, true], "980029756", "65009"];
 
 // REFRESH PAGE ELEMENT VARIABLES THAT CHANGE DURING UI INTERACTION
 function updateVariableElements() {
@@ -24,7 +27,7 @@ function playBuzzer() {
 
 // POST ARG rwdata TO SERVER
 async function postRework(rwdata) {
-	stringdata=rwdata.join();
+	let stringdata = rwdata.join();
 	axios({
 		method: 'post',
 		url: stringdata,
@@ -111,16 +114,45 @@ Object.values(inputs).forEach((j) => {j.addEventListener("keydown",inputCycle)})
 // GRAB QTY INPUTS ON UPDATE, CYCLE THROUGH FORM ON ENTER
 function qtyUpdate(event) {
 	if (event.key==="Enter") {
-		var index = [...qtyInput].indexOf(event.target);
+		let index = [...qtyInput].indexOf(event.target);
 		if (index <= 7) {qtyInput.elements[index + 1].focus();}
 		else {input.elements[0].focus();}
 	}
 	if (qtyInput.elements[1].value !== "" || qtyInput.elements[2].value !== "") {
 		let qty1 = qtyInput.elements[1].value !== "" ? parseInt(qtyInput.elements[1].value) : 0;
 		let qty2 = qtyInput.elements[2].value !== "" ? parseInt(qtyInput.elements[2].value) : 0;
-		var partArray = new Array(qty1).fill(partOutInputs).concat(new Array(qty2).fill(partInInputs));
+		let partArray = new Array(qty1).fill(partOutInputs).concat(new Array(qty2).fill(partInInputs));
 		document.getElementById('parts').innerHTML=partArray.join("");
 		updateVariableElements();
 	}
 }
 Object.values(qtys).forEach((j) => {j.addEventListener("keyup",qtyUpdate)});
+
+// AUTOMATED PO SETUP SCRIPT TRIGGERED BY BUTTONS
+function autoSetup(event) {
+	console.log("clicked");
+	switch(event.target.innerText) {
+		case "M9100-10 to M9100-11":
+			console.log("switched");
+			qtyInput.elements[1].value = M910010to11[0];
+			qtyInput.elements[2].value = M910010to11[1];
+
+			//let fakeEvent = document.createEvent('Event');
+			qtyUpdate(document.createEvent('Event'));
+
+			qtyInput.elements[3].value = M910010to11[2];
+			qtyInput.elements[4].value = M910010to11[3];
+			input.elements[1].checked = M910010to11[4][0];
+			input.elements[2].checked = M910010to11[4][1];
+			input.elements[3].checked = M910010to11[4][2];
+			input.elements[4].value = M910010to11[5];
+			input.elements[6].value = M910010to11[6];
+			input.elements[9].checked = M910010to11[7][0];
+			input.elements[10].checked = M910010to11[7][1];
+			input.elements[11].checked = M910010to11[7][2];
+			input.elements[12].value = M910010to11[8];
+			input.elements[14].value = M910010to11[9];
+			break;
+	}
+}
+Object.values(buttons).forEach((j) => {j.addEventListener("click",autoSetup)});

@@ -1,3 +1,8 @@
+/*<!--<h2>Which rework function?</h2>
+<input class="btn redbtn" id="sel-remove" type="submit" value="M9100-11 Remove VFD"/>
+<input class="btn greenbtn" id="sel-attach" type="submit" value="M9100-10 Attach VFD"/>
+-->*/
+
 // ENV VARIABLES
 const attach = document.getElementById('sel-attach');
 const remove = document.getElementById('sel-remove');
