@@ -4,8 +4,11 @@ const qtyInput = document.getElementById('qty');
 var inputs = document.getElementsByClassName('inputs');
 const qtys = document.getElementsByClassName('qtys');
 var checkForms = document.getElementsByClassName('checkboxes');
+
 const partOutInputs = `<li>Part Out <div class="checkboxes"> Ignore: <label>PAR S/N:<input type="checkbox"></label> <label>MFGR S/N:<input type="checkbox"></label> <label>MFGR Date Code:<input type="checkbox"></label> </div> <div> <ol> <li> <label>Fru or P/N:<input type="text" class="inputs" required></label> </li> <li> <label>PAR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR P/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR Date Code:<input type="text" class="inputs" required></label> </li> </ol> </div> </li>`;
 const partInInputs = `<li>Part In <div class="checkboxes"> Ignore: <label>PAR S/N:<input type="checkbox"></label> <label>MFGR S/N:<input type="checkbox"></label> <label>MFGR Date Code:<input type="checkbox"></label> </div> <div> <ol> <li> <label>Fru or P/N:<input type="text" class="inputs" required></label> </li> <li> <label>PAR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR P/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR Date Code:<input type="text" class="inputs" required></label> </li> </ol> </div> </li>`;
+
+const assemblyPartNumbers = ['M9100-10','M9100-11','M9110-11','M9110-21'];
 
 // REFRESH PAGE ELEMENT VARIABLES THAT CHANGE DURING UI INTERACTION
 function updateVariableElements() {
@@ -14,23 +17,9 @@ function updateVariableElements() {
 	checkForms = document.getElementsByClassName('checkboxes');
 }
 
-// ONLOAD FUNCTION
-function renderHello() {
-	var list = document.getElementById('list').innerHTML;
-	var rendered = "";//Mustache.render(list, { name: 'Luke' });
-
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", "/res.json");
-	xhr.setRequestHeader("Content-Type", "application/json");
-	xhr.send();
-	xhr.onreadystatechange = function () {
-		/*if (xhr.readyState === 4 && xhr.status === 200) {
-			rendered = Mustache.render(list, {name: this.responseText});
-			document.getElementById('target').innerHTML = `
-				<p>Figuring out how to add part entry prompts based on number input in form id qty</p>
-			`+rendered;
-		}*/
-	};
+// PLAY BUZZER NOISE TO ALERT USER OF MISINPUT
+function playBuzzer() {
+	document.getElementById('buzz').play();
 }
 
 // POST ARG rwdata TO SERVER
@@ -76,37 +65,42 @@ function inputCycle(event) {
 	let ii = index-1 > -1 ? index-1 : 0;
 	let checks = [];
 	if (event.key==="Enter") {
-		if (ii%8 < 3) {
-			index = input.elements[(Math.floor(ii/8)*8)+4].value !== "" ? (Math.floor(ii/8)*8)+5 : (Math.floor(ii/8)*8)+4;
-			ii = index-1;
-			checks = [];
-			for (let x=0; x<3; x++) {
-				checks.push(checkForms[Math.floor(ii/8)].children[x].children[0].checked);
-			}
-			input.elements[index].focus();
+		if (index === 0 && assemblyPartNumbers.includes(input.elements[index].value)) {
+			playBuzzer();
+			input.elements[index].value = '';
+			document.getElementById("errorLightUpWindow").classList.add("error-container");
 		}
-		try {
-			while (input.elements[index].value !== "" || (ii%8 === 4 && checks[0]) || (ii%8 === 6 && checks[1]) || (ii%8 === 7 && checks[2]) ) {
-				console.log(ii);
-				index++;
-				ii++;
-				if (ii%8 < 3) {
-					index = input.elements[(Math.floor(ii/8)*8)+4].value !== "" ? (Math.floor(ii/8)*8)+5 : (Math.floor(ii/8)*8)+4;
-					ii = index-1;
-				}
+		else {
+			document.getElementById("errorLightUpWindow").classList.remove("error-container");
+			if (ii%8 < 3) {
+				index = input.elements[(Math.floor(ii/8)*8)+4].value !== "" ? (Math.floor(ii/8)*8)+5 : (Math.floor(ii/8)*8)+4;
+				ii = index-1;
 				checks = [];
 				for (let x=0; x<3; x++) {
 					checks.push(checkForms[Math.floor(ii/8)].children[x].children[0].checked);
 				}
+				input.elements[index].focus();
 			}
-			//if (index%9 === 5 && checks[0]) {index++;}
-			//if (index%9 === 7 && checks[1]) {index++;}
-			//if (index%9 === 8 && checks[2]) {index++;}
-			input.elements[index].focus();
-		} catch {
-			postInputs();
-			// return to first input
-			input.elements[0].focus();
+			try {
+				while (input.elements[index].value !== "" || (ii%8 === 4 && checks[0]) || (ii%8 === 6 && checks[1]) || (ii%8 === 7 && checks[2]) ) {
+					console.log(ii);
+					index++;
+					ii++;
+					if (ii%8 < 3) {
+						index = input.elements[(Math.floor(ii/8)*8)+4].value !== "" ? (Math.floor(ii/8)*8)+5 : (Math.floor(ii/8)*8)+4;
+						ii = index-1;
+					}
+					checks = [];
+					for (let x=0; x<3; x++) {
+						checks.push(checkForms[Math.floor(ii/8)].children[x].children[0].checked);
+					}
+				}
+				input.elements[index].focus();
+			} catch {
+				postInputs();
+				// return to first input
+				input.elements[0].focus();
+			}
 		}
 	}
 }
@@ -117,7 +111,7 @@ function qtyUpdate(event) {
 	if (event.key==="Enter") {
 		var index = [...qtyInput].indexOf(event.target);
 		if (index <= 4) {qtyInput.elements[index + 1].focus();}
-		else {input.elements[0].focus()}
+		else {input.elements[0].focus();}
 	}
 	if (qtyInput.elements[1].value !== "" || qtyInput.elements[2].value !== "") {
 		let qty1 = qtyInput.elements[1].value !== "" ? parseInt(qtyInput.elements[1].value) : 0;

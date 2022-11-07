@@ -2,10 +2,11 @@
 <html>
 <head>
 	<link rel="stylesheet" href="index.css">
+	<audio id="buzz" src="buzzer.mp3" preload="auto"></audio>
 	<title>Phase Rework</title>
 </head>
 
-<body onload="renderHello()">
+<body>
 <div class="generic-container">
 	<h2>Enter Production Order Information:</h2>
 	<!--<h2>Which rework function?</h2>
@@ -33,7 +34,7 @@
 		</h4>
 	</form>
 </div>
-<div class="specific-container">
+<div id="errorLightUpWindow" class="specific-container">
 	<form id="input">
 		<h2>Enter Unit Specific Information:</h2>
 		<h4>
