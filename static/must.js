@@ -130,10 +130,8 @@ Object.values(qtys).forEach((j) => {j.addEventListener("keyup",qtyUpdate)});
 
 // AUTOMATED PO SETUP SCRIPT TRIGGERED BY BUTTONS
 function autoSetup(event) {
-	console.log("clicked");
 	switch(event.target.innerText) {
 		case "M9100-10 to M9100-11":
-			console.log("switched");
 			qtyInput.elements[1].value = M910010to11[0];
 			qtyInput.elements[2].value = M910010to11[1];
 
