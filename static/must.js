@@ -54,7 +54,10 @@ function postInputs() {
 		if (!(i%5 === 0 || i%5 === 2)) {j.value='';}
 		i++;
 	});
-	let statarray = [qtyInput.elements[0].value,qtyInput.elements[5].value,qtyInput.elements[3].value,qtyInput.elements[4].value];
+	let statarray = [qtyInput.elements[0].value,qtyInput.elements[5].value,qtyInput.elements[3].value,
+		qtyInput.elements[4].value,qtyInput.elements[6].value, qtyInput.elements[7].value,
+		qtyInput.elements[8].value
+	];
 	postRework(statarray.concat(rwdata));
 }
 send.addEventListener('click', postInputs);
@@ -83,7 +86,6 @@ function inputCycle(event) {
 			}
 			try {
 				while (input.elements[index].value !== "" || (ii%8 === 4 && checks[0]) || (ii%8 === 6 && checks[1]) || (ii%8 === 7 && checks[2]) ) {
-					console.log(ii);
 					index++;
 					ii++;
 					if (ii%8 < 3) {
@@ -110,7 +112,7 @@ Object.values(inputs).forEach((j) => {j.addEventListener("keydown",inputCycle)})
 function qtyUpdate(event) {
 	if (event.key==="Enter") {
 		var index = [...qtyInput].indexOf(event.target);
-		if (index <= 4) {qtyInput.elements[index + 1].focus();}
+		if (index <= 7) {qtyInput.elements[index + 1].focus();}
 		else {input.elements[0].focus();}
 	}
 	if (qtyInput.elements[1].value !== "" || qtyInput.elements[2].value !== "") {
