@@ -11,7 +11,7 @@ const partInInputs = `<li>Part In <div class="checkboxes"> Ignore: <label>PAR S/
 
 const assemblyPartNumbers = ['M9100-10','M9100-11','M9110-11','M9110-21'];
 
-const M910010to11 = [1, 1, "M9100-10", "M9100-11", [true, true, true], "980029758", "POS-TGL-BC1", [true, true, true], "980029756", "65009"];
+const M910010to11 = [1, 1, "M9100-10", "M9100-11", [true, true, true], "980029758", "POS-TGL-BC1", [true, false, true], "980029756", "T202MD15DB"];
 
 // REFRESH PAGE ELEMENT VARIABLES THAT CHANGE DURING UI INTERACTION
 function updateVariableElements() {
@@ -58,10 +58,10 @@ function postInputs() {
 		i++;
 	});
 	let statarray = [qtyInput.elements[0].value,qtyInput.elements[5].value,qtyInput.elements[3].value,
-		qtyInput.elements[4].value,qtyInput.elements[6].value, qtyInput.elements[7].value,
-		qtyInput.elements[8].value
+		qtyInput.elements[4].value,rwdata[0],qtyInput.elements[6].value, 
+		qtyInput.elements[7].value,qtyInput.elements[8].value
 	];
-	postRework(statarray.concat(rwdata));
+	postRework(statarray.concat(rwdata.slice(1)));
 }
 send.addEventListener('click', postInputs);
 
