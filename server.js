@@ -1,7 +1,7 @@
-var http=require('http');
-var https=require('https');
-var fs=require('fs');
-var path=require('path');
+import * as https from 'node:https';
+//import * as http from 'node:http';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 const PORT=9615;
 const MIME_TYPES = {
@@ -61,4 +61,4 @@ const fileServ = async (req, res) => {
 
 https.createServer(options, fileServ).listen(PORT);
 
-console.log(`Server running at http://127.0.0.1:${PORT}/`);
+console.log(`Server running at https://127.0.0.1:${PORT}/`);

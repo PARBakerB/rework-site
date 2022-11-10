@@ -8,9 +8,8 @@ const buttons = document.getElementsByClassName("auto-setup-buttons");
 
 const partOutInputs = `<li>Part Out <div class="checkboxes"> Ignore: <label>PAR S/N:<input type="checkbox"></label> <label>MFGR S/N:<input type="checkbox"></label> <label>MFGR Date Code:<input type="checkbox"></label> </div> <div> <ol> <li> <label>Fru or P/N:<input type="text" class="inputs" required></label> </li> <li> <label>PAR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR P/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR Date Code:<input type="text" class="inputs" required></label> </li> </ol> </div> </li>`;
 const partInInputs = `<li>Part In <div class="checkboxes"> Ignore: <label>PAR S/N:<input type="checkbox"></label> <label>MFGR S/N:<input type="checkbox"></label> <label>MFGR Date Code:<input type="checkbox"></label> </div> <div> <ol> <li> <label>Fru or P/N:<input type="text" class="inputs" required></label> </li> <li> <label>PAR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR P/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR Date Code:<input type="text" class="inputs" required></label> </li> </ol> </div> </li>`;
-
+const inOut = [0,0];
 const assemblyPartNumbers = ['M9100-10','M9100-11','M9110-11','M9110-21'];
-
 const M910010to11 = [1, 1, "M9100-10", "M9100-11", [true, true, true], "980029758", "POS-TGL-BC1", [true, false, true], "980029756", "T202MD15DB"];
 
 // REFRESH PAGE ELEMENT VARIABLES THAT CHANGE DURING UI INTERACTION
@@ -71,7 +70,7 @@ function inputCycle(event) {
 	let ii = index-1 > -1 ? index-1 : 0;
 	let checks = [];
 	if (event.key==="Enter") {
-		if (index === 0 && assemblyPartNumbers.includes(input.elements[index].value)) {
+		if (index === 0 && assemblyPartNumbers.includes(input.elements[index].value.toUpperCase())) {
 			playBuzzer();
 			input.elements[index].value = '';
 			document.getElementById("errorLightUpWindow").classList.add("error-container");
@@ -122,7 +121,12 @@ function qtyUpdate(event) {
 		let qty1 = qtyInput.elements[1].value !== "" ? parseInt(qtyInput.elements[1].value) : 0;
 		let qty2 = qtyInput.elements[2].value !== "" ? parseInt(qtyInput.elements[2].value) : 0;
 		let partArray = new Array(qty1).fill(partOutInputs).concat(new Array(qty2).fill(partInInputs));
-		document.getElementById('parts').innerHTML=partArray.join("");
+		console.log(inOut[0] + "" + inOut[1]);
+		if (inOut[0] !== qty1 || inOut[1] !== qty2) {
+			document.getElementById('parts').innerHTML=partArray.join("");
+			inOut[0] = qty1;
+			inOut[1] = qty2;
+		}
 		updateVariableElements();
 	}
 }
