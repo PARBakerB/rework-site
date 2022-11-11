@@ -19,9 +19,8 @@ const MIME_TYPES = {
   svg: 'image/svg+xml',
 };
 const STATIC_PATH = path.join(process.cwd(), './static');
-var logStream = fs.createWriteStream(STATIC_PATH + '/log.csv');
+var logStream = fs.createWriteStream(STATIC_PATH + '/logs/' + Date().slice(0,-39).replace(/ /g, "_") + '.csv');
 const stream = fs.createReadStream('./static/index.html');
-
 const options = {
 	key: fs.readFileSync('./key.pem'),
 	cert: fs.readFileSync('./cert.pem')

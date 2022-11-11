@@ -44,17 +44,20 @@
 	</form>
 </div>
 <div id="errorLightUpWindow" class="specific-container">
-	<form id="input">
-		<h2>Enter Unit Specific Information:</h2>
-		<h4>
+	<h2>Enter Unit Specific Information:</h2>
+	<div class="notes">
+		<label>Entry Notes: (e.g. "Unit replaces: <em>SERIAL</em>")<input type="text" required></label>
+	</div>
+	<h4>
+		<form id="input">
 			<div class="rework-form">
-				<label>Assembly Serial Number:</label><input type="text" class="inputs" required>
+				<label>Assembly Serial Number:<input type="text" class="inputs" required></label>
 			</div>
 			<div class="rework-form">
 				<ol id="parts"></ol>
 			</div>
-		</h4>
-	</form>
+		</form>
+	</h4>
 </div>
 <div class="submit">
 	<input id='send' type="submit" value="Submit">

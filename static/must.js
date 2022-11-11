@@ -5,6 +5,7 @@ var inputs = document.getElementsByClassName('inputs');
 const qtys = document.getElementsByClassName('qtys');
 var checkForms = document.getElementsByClassName('checkboxes');
 const buttons = document.getElementsByClassName("auto-setup-buttons");
+const notesInput = document.getElementsByClassName("notes")[0].children[0].children[1];
 
 const partOutInputs = `<li>Part Out <div class="checkboxes"> Ignore: <label>PAR S/N:<input type="checkbox"></label> <label>MFGR S/N:<input type="checkbox"></label> <label>MFGR Date Code:<input type="checkbox"></label> </div> <div> <ol> <li> <label>Fru or P/N:<input type="text" class="inputs" required></label> </li> <li> <label>PAR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR P/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR Date Code:<input type="text" class="inputs" required></label> </li> </ol> </div> </li>`;
 const partInInputs = `<li>Part In <div class="checkboxes"> Ignore: <label>PAR S/N:<input type="checkbox"></label> <label>MFGR S/N:<input type="checkbox"></label> <label>MFGR Date Code:<input type="checkbox"></label> </div> <div> <ol> <li> <label>Fru or P/N:<input type="text" class="inputs" required></label> </li> <li> <label>PAR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR P/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR Date Code:<input type="text" class="inputs" required></label> </li> </ol> </div> </li>`;
@@ -40,7 +41,7 @@ function postInputs() {
 	let qty2 = qtyInput.elements[2].value !== "" ? parseInt(qtyInput.elements[2].value) : 0;
 	let partQty = [qty1, qty2];
 	let arraysize = partQty[1]>partQty[0] ? partQty[1]*5*2 : (partQty[0]*5*2)-5;
-	let rwdata=new Array(arraysize + 1);
+	let rwdata=new Array(arraysize + 2);
 	let i = -1;
 	Object.values(inputs).forEach((j) => {
 		// csv format processing for insertion into excel
@@ -56,13 +57,18 @@ function postInputs() {
 		if (!(i%5 === 0 || i%5 === 2)) {j.value='';}
 		i++;
 	});
+	rwdata[i+1] = notesInput.value;
+	notesInput.value = '';
 	let statarray = [qtyInput.elements[0].value,qtyInput.elements[5].value,qtyInput.elements[3].value,
 		qtyInput.elements[4].value,rwdata[0],qtyInput.elements[6].value, 
 		qtyInput.elements[7].value,qtyInput.elements[8].value
 	];
 	postRework(statarray.concat(rwdata.slice(1)));
 }
-send.addEventListener('click', postInputs);
+send.addEventListener('click', () => {
+	postInputs();
+	input.elements[0].focus();
+});
 
 // NAVIGATING BETWEEN INPUTS AND FORM SUBMISSION USING ENTER KEY
 function inputCycle(event) {
@@ -121,7 +127,6 @@ function qtyUpdate(event) {
 		let qty1 = qtyInput.elements[1].value !== "" ? parseInt(qtyInput.elements[1].value) : 0;
 		let qty2 = qtyInput.elements[2].value !== "" ? parseInt(qtyInput.elements[2].value) : 0;
 		let partArray = new Array(qty1).fill(partOutInputs).concat(new Array(qty2).fill(partInInputs));
-		console.log(inOut[0] + "" + inOut[1]);
 		if (inOut[0] !== qty1 || inOut[1] !== qty2) {
 			document.getElementById('parts').innerHTML=partArray.join("");
 			inOut[0] = qty1;
@@ -158,3 +163,9 @@ function autoSetup(event) {
 	}
 }
 Object.values(buttons).forEach((j) => {j.addEventListener("click",autoSetup)});
+
+notesInput.addEventListener('keyup', (event)=>{
+	if (event.key === "Enter") {
+		input.elements[0].focus();
+	}
+});
