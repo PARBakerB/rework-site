@@ -3,6 +3,8 @@ import * as https from 'node:https';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+import { greatestLogDate } from './modules/fileDate.js';
+
 const PORT=9615;
 const MIME_TYPES = {
   default: 'application/octet-stream',
@@ -19,8 +21,7 @@ const MIME_TYPES = {
   svg: 'image/svg+xml',
 };
 const STATIC_PATH = path.join(process.cwd(), './static');
-var logStream = fs.createWriteStream(STATIC_PATH + '/logs/' + Date().slice(0,-39).replace(/ /g, "_") + '.csv');
-const stream = fs.createReadStream('./static/index.html');
+const logFileName = STATIC_PATH + '/logs/' + Date().slice(0,-39).replace(/ /g, "_") + '.csv';
 const options = {
 	key: fs.readFileSync('./key.pem'),
 	cert: fs.readFileSync('./cert.pem')
@@ -29,24 +30,33 @@ const options = {
 const toBool = [() => true, () => false];
 
 const getResponse = async (url) => {
-	const paths = [STATIC_PATH, url];
-	if (url.endsWith('/')) paths.push('index.html');
-	const filePath = path.join(...paths);
-	const pathTraversal = !filePath.startsWith(STATIC_PATH);
-	const exists = await fs.promises.access(filePath).then(...toBool);
-	const found = !pathTraversal && exists;
-	const streamPath = found ? filePath : STATIC_PATH + '/404.html';
-	const ext = path.extname(streamPath).substring(1).toLowerCase();
-	const stream = fs.createReadStream(streamPath);
-	return { found, ext, stream };
+	if (url.endsWith('log.csv')) {
+		const found = true;
+		const paths = [STATIC_PATH, '/logs/', greatestLogDate()];
+		const filePath = path.join(...paths);
+		const ext = path.extname(filePath).substring(1);
+		const stream = fs.createReadStream(filePath);
+		return { found, ext, stream };
+	} else {
+		const paths = [STATIC_PATH, url];
+		if (url.endsWith('/')) paths.push('index.html');
+		const filePath = path.join(...paths);
+		const pathTraversal = !filePath.startsWith(STATIC_PATH);
+		const exists = await fs.promises.access(filePath).then(...toBool);
+		const found = !pathTraversal && exists;
+		const streamPath = found ? filePath : STATIC_PATH + '/404.html';
+		const ext = path.extname(streamPath).substring(1).toLowerCase();
+		const stream = fs.createReadStream(streamPath);
+		return { found, ext, stream };
+	}
 };
 const postResponse = async (req, res) => {
-	logStream.write(req.url.substring(1));
-	logStream.write("\n");
+	fs.appendFile(logFileName, req.url.substring(1) + '\n', function (err) {if (err) throw err;});
 	const found = true;
 	const ext = 'html';
+	const streamPath = [STATIC_PATH, '/', 'index.html'];
+	const stream = fs.createReadStream(path.join(...streamPath));
 	return { found, ext, stream };
-	//return reqFile(req.url);
 };
 const fileServ = async (req, res) => {
 	const file = req.method === 'POST' ? await postResponse(req, res) : await getResponse(req.url);

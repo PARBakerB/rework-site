@@ -58,15 +58,27 @@
 			</div>
 		</form>
 	</h4>
+	<div class="submit">
+		<input id='send' type="submit" value="Submit">
+	</div>
 </div>
-<div class="submit">
-	<input id='send' type="submit" value="Submit">
+<div class="log-request-container">
+	<h2>Get Log for Label Printing:</h2>
+	<h4>
+		<form id="log-request">
+			<div class="log-form">
+				<label>Prod Number:<input type="text" class="log-requests"></label>
+			</div>
+			<div class="log-form">
+				<label>Number of units:<input type="number" class="log-requests"></label>
+			</div>
+		</form>
+	</h4>
+	<ol id="log-content">
+	</ol>
 </div>
-<div id="target"></div>
 
-<script id="list" type="x-tmpl-mustache">{{ name }}</script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="https://unpkg.com/mustache@latest"></script>
 <script type="module" src="must.js"></script>
 </body>
 </html>

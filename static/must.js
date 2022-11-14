@@ -1,8 +1,10 @@
 const send = document.getElementById('send');
 var input = document.getElementById('input');
 const qtyInput = document.getElementById('qty');
+const logReq = document.getElementById('log-request');
 var inputs = document.getElementsByClassName('inputs');
 const qtys = document.getElementsByClassName('qtys');
+const logReqs = document.getElementsByClassName('log-requests');
 var checkForms = document.getElementsByClassName('checkboxes');
 const buttons = document.getElementsByClassName("auto-setup-buttons");
 const notesInput = document.getElementsByClassName("notes")[0].children[0].children[1];
@@ -169,3 +171,34 @@ notesInput.addEventListener('keyup', (event)=>{
 		input.elements[0].focus();
 	}
 });
+
+function getLogRequest() {
+	return axios({
+		method: 'get',
+		url: "log.csv",
+		headers: {'Content-Type' : 'application/x-www-form-urlencoded'}
+	});
+}
+async function viewLog(event) {
+	if (event.key === "Enter") {
+		let index = [...logReq].indexOf(event.target);
+		if (index<1) {
+			logReq.elements[index+1].focus()
+		}
+		else {
+			const logdiv = document.getElementById("log-content");
+			const logReqSize = logReqs[1].value;
+			const log = await getLogRequest();
+			logdiv.innerHTML = "";
+			let logArray = log.data.split("\n");
+			let x = 2;
+			logArray.forEach(j => {
+				if (j !== "" && x > (logArray.length - logReqSize) && (j.slice(0, j.indexOf(",")) === logReqs[0].value)) {
+					logdiv.innerHTML += ("<li>" + j.slice(18,(j.substring(29).indexOf(",") + 29)) + "</li>");
+				}
+				x++;
+			});
+		}
+	}
+}
+Object.values(logReqs).forEach((j)=>{j.addEventListener("keyup",viewLog);});
