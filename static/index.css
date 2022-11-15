@@ -1,10 +1,10 @@
 li {
   padding: 2px;
 }
-.notes input{
+#notes input{
   width: 60%;
 }
-.notes label{
+#notes label{
   color: red;
 }
 .rework-form {

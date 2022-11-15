@@ -7,7 +7,7 @@ const qtys = document.getElementsByClassName('qtys');
 const logReqs = document.getElementsByClassName('log-requests');
 var checkForms = document.getElementsByClassName('checkboxes');
 const buttons = document.getElementsByClassName("auto-setup-buttons");
-const notesInput = document.getElementsByClassName("notes")[0].children[0].children[1];
+const notesInput = document.getElementById("notes").children[0].children[1];
 
 const partOutInputs = `<li>Part Out <div class="checkboxes"> Ignore: <label>PAR S/N:<input type="checkbox"></label> <label>MFGR S/N:<input type="checkbox"></label> <label>MFGR Date Code:<input type="checkbox"></label> </div> <div> <ol> <li> <label>Fru or P/N:<input type="text" class="inputs" required></label> </li> <li> <label>PAR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR P/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR Date Code:<input type="text" class="inputs" required></label> </li> </ol> </div> </li>`;
 const partInInputs = `<li>Part In <div class="checkboxes"> Ignore: <label>PAR S/N:<input type="checkbox"></label> <label>MFGR S/N:<input type="checkbox"></label> <label>MFGR Date Code:<input type="checkbox"></label> </div> <div> <ol> <li> <label>Fru or P/N:<input type="text" class="inputs" required></label> </li> <li> <label>PAR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR P/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR Date Code:<input type="text" class="inputs" required></label> </li> </ol> </div> </li>`;
@@ -43,11 +43,11 @@ function postInputs() {
 	let qty2 = qtyInput.elements[2].value !== "" ? parseInt(qtyInput.elements[2].value) : 0;
 	let partQty = [qty1, qty2];
 	let arraysize = partQty[1]>partQty[0] ? partQty[1]*5*2 : (partQty[0]*5*2)-5;
-	let rwdata=new Array(arraysize + 2);
+	let rwdata = new Array(arraysize + 2);
 	let i = -1;
 	Object.values(inputs).forEach((j) => {
 		// csv format processing for insertion into excel
-		if (i===-1) {rwdata[0] = j.value}
+		if (i === -1) {rwdata[0] = j.value}
 		else if (i < partQty[0]*5) {
 			let index = i>4 ? (i%5) + (Math.floor(i/5) * 10) : i;
 			rwdata[index+1] = j.value;
@@ -166,12 +166,14 @@ function autoSetup(event) {
 }
 Object.values(buttons).forEach((j) => {j.addEventListener("click",autoSetup)});
 
+// MOVES FOCUS TO BEGINNING OF FORM ON ENTER PRESS IN NOTES FIELD
 notesInput.addEventListener('keyup', (event)=>{
 	if (event.key === "Enter") {
 		input.elements[0].focus();
 	}
 });
 
+// RETURNS FILE STREAM OF ACTIVE LOG FILE
 function getLogRequest() {
 	return axios({
 		method: 'get',
@@ -179,6 +181,8 @@ function getLogRequest() {
 		headers: {'Content-Type' : 'application/x-www-form-urlencoded'}
 	});
 }
+
+// INPUT PROCESSING FOR LOG UI SECTION
 async function viewLog(event) {
 	if (event.key === "Enter") {
 		let index = [...logReq].indexOf(event.target);
@@ -191,12 +195,12 @@ async function viewLog(event) {
 			const log = await getLogRequest();
 			logdiv.innerHTML = "";
 			let logArray = log.data.split("\n");
-			let x = 2;
-			logArray.forEach(j => {
-				if (j !== "" && x > (logArray.length - logReqSize) && (j.slice(0, j.indexOf(",")) === logReqs[0].value)) {
-					logdiv.innerHTML += ("<li>" + j.slice(18,(j.substring(29).indexOf(",") + 29)) + "</li>");
+			let x = 0;
+			logArray.reverse().forEach(j => {
+				if (j !== "" && x < logReqSize && (j.slice(0, j.indexOf(",")) === logReqs[0].value)) {
+					logdiv.innerHTML += ("<li>" + j.split(",")[4] + "</li>");
+					x++;
 				}
-				x++;
 			});
 		}
 	}
