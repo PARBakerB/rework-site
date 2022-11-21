@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
 	<link rel="stylesheet" href="index.css">
 	<audio id="buzz" src="buzzer.mp3" preload="auto"></audio>
 	<title>Phase Rework</title>
@@ -9,6 +11,7 @@
 <body>
 <div class="button-container">
 	<button class="auto-setup-buttons">M9100-10 to M9100-11</button>
+	<button class="auto-setup-buttons">Custom</button>
 </div>
 <div class="generic-container">
 	<h2>Enter Production Order Information:</h2>
@@ -74,8 +77,11 @@
 			</div>
 		</form>
 	</h4>
-	<ol id="log-content">
-	</ol>
+	<div id="log-output" class="hide">
+		<p>Most Recent Scans at Top:</p>
+		<ol id="log-content">
+		</ol>
+	</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>

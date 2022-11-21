@@ -1,5 +1,5 @@
 const send = document.getElementById('send');
-var input = document.getElementById('input');
+const input = document.getElementById('input');
 const qtyInput = document.getElementById('qty');
 const logReq = document.getElementById('log-request');
 var inputs = document.getElementsByClassName('inputs');
@@ -8,18 +8,49 @@ const logReqs = document.getElementsByClassName('log-requests');
 var checkForms = document.getElementsByClassName('checkboxes');
 const buttons = document.getElementsByClassName("auto-setup-buttons");
 const notesInput = document.getElementById("notes").children[0].children[1];
+const logOut = document.getElementById("log-output");
 
-const partOutInputs = `<li>Part Out <div class="checkboxes"> Ignore: <label>PAR S/N:<input type="checkbox"></label> <label>MFGR S/N:<input type="checkbox"></label> <label>MFGR Date Code:<input type="checkbox"></label> </div> <div> <ol> <li> <label>Fru or P/N:<input type="text" class="inputs" required></label> </li> <li> <label>PAR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR P/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR Date Code:<input type="text" class="inputs" required></label> </li> </ol> </div> </li>`;
-const partInInputs = `<li>Part In <div class="checkboxes"> Ignore: <label>PAR S/N:<input type="checkbox"></label> <label>MFGR S/N:<input type="checkbox"></label> <label>MFGR Date Code:<input type="checkbox"></label> </div> <div> <ol> <li> <label>Fru or P/N:<input type="text" class="inputs" required></label> </li> <li> <label>PAR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR P/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR S/N:<input type="text" class="inputs" required></label> </li> <li> <label>MFGR Date Code:<input type="text" class="inputs" required></label> </li> </ol> </div> </li>`;
-const inOut = [0,0];
+var inOut = [0,0];
+var disabledArray = [];
 const assemblyPartNumbers = ['M9100-10','M9100-11','M9110-11','M9110-21'];
-const M910010to11 = [1, 1, "M9100-10", "M9100-11", [true, true, true], "980029758", "POS-TGL-BC1", [true, false, true], "980029756", "T202MD15DB"];
+const M910010to11 = [1, 1, "M9100-10", "M9100-11", [true, true, true], "980029758", "POS-TGL-BC1", [true, false, true], "980029756", "20M204DA4"];
 
 // REFRESH PAGE ELEMENT VARIABLES THAT CHANGE DURING UI INTERACTION
 function updateVariableElements() {
 	inputs = document.getElementsByClassName('inputs');
 	Object.values(inputs).forEach((j) => {if (j.getAttribute('listener') !== 'true') {j.addEventListener("keydown",inputCycle)}});
 	checkForms = document.getElementsByClassName('checkboxes');
+}
+
+// TAKES DOM ELEMENT OR DOM ELEMENT ARRAY WITH HIDE OR SHOW CLASS AND SWAPS THEM OUT
+function toggleVisibility(domObject, value) {
+	if (Array.isArray(domObject)) {
+		domObject.foreach(j => {
+			if (j.classList.contains('hide') && value == true) {
+				j.classList.remove('hide');
+				j.classList.add('show');
+			} else if (j.classList.contains('show') && value == false) {
+				j.classList.remove('show');
+				j.classList.add('hide');
+			}
+		});
+	} else {
+		if (domObject.classList.contains('hide') && value == true) {
+			domObject.classList.remove('hide');
+			domObject.classList.add('show');
+		} else if (domObject.classList.contains('show') && value == false) {
+			domObject.classList.remove('show');
+			domObject.classList.add('hide');
+		}
+	}
+}
+
+// PREVENT A DOM INPUT FROM BEING MODIFIED
+function disableInput(domInput) {
+	if (domInput.disabled == false) {
+		disabledArray.push(domInput);
+		domInput.disabled = true;
+	}
 }
 
 // PLAY BUZZER NOISE TO ALERT USER OF MISINPUT
@@ -33,6 +64,24 @@ async function postRework(rwdata) {
 	axios({
 		method: 'post',
 		url: stringdata,
+		headers: {'Content-Type' : 'application/x-www-form-urlencoded'}
+	});
+}
+
+// RETURNS FILE STREAM OF ACTIVE LOG FILE
+function getLogRequest() {
+	return axios({
+		method: 'get',
+		url: "log.csv",
+		headers: {'Content-Type' : 'application/x-www-form-urlencoded'}
+	});
+}
+
+// GET INPUT HTML FILES FOR CREATING PART FIELDS
+function getFile(fileName) {
+	return axios({
+		method: 'get',
+		url: fileName,
 		headers: {'Content-Type' : 'application/x-www-form-urlencoded'}
 	});
 }
@@ -95,7 +144,7 @@ function inputCycle(event) {
 				input.elements[index].focus();
 			}
 			try {
-				while (input.elements[index].value !== "" || (ii%8 === 4 && checks[0]) || (ii%8 === 6 && checks[1]) || (ii%8 === 7 && checks[2]) ) {
+				while ((input.elements[index].value !== "") || (ii%8 === 4 && checks[0]) || (ii%8 === 6 && checks[1]) || (ii%8 === 7 && checks[2])) {
 					index++;
 					ii++;
 					if (ii%8 < 3) {
@@ -119,7 +168,7 @@ function inputCycle(event) {
 Object.values(inputs).forEach((j) => {j.addEventListener("keydown",inputCycle)});
 
 // GRAB QTY INPUTS ON UPDATE, CYCLE THROUGH FORM ON ENTER
-function qtyUpdate(event) {
+async function qtyUpdate(event) {
 	if (event.key==="Enter") {
 		let index = [...qtyInput].indexOf(event.target);
 		if (index <= 7) {qtyInput.elements[index + 1].focus();}
@@ -128,6 +177,10 @@ function qtyUpdate(event) {
 	if (qtyInput.elements[1].value !== "" || qtyInput.elements[2].value !== "") {
 		let qty1 = qtyInput.elements[1].value !== "" ? parseInt(qtyInput.elements[1].value) : 0;
 		let qty2 = qtyInput.elements[2].value !== "" ? parseInt(qtyInput.elements[2].value) : 0;
+		let po = await getFile("PartsOut.html");
+		let pi =  await getFile("PartsIn.html");
+		let partOutInputs = po.data;
+		let partInInputs = pi.data;
 		let partArray = new Array(qty1).fill(partOutInputs).concat(new Array(qty2).fill(partInInputs));
 		if (inOut[0] !== qty1 || inOut[1] !== qty2) {
 			document.getElementById('parts').innerHTML=partArray.join("");
@@ -136,21 +189,31 @@ function qtyUpdate(event) {
 		}
 		updateVariableElements();
 	}
+	else {
+		document.getElementById('parts').innerHTML="";
+		inOut[0] = 0;
+		inOut[1] = 0;
+		updateVariableElements();
+	}
 }
 Object.values(qtys).forEach((j) => {j.addEventListener("keyup",qtyUpdate)});
 
 // AUTOMATED PO SETUP SCRIPT TRIGGERED BY BUTTONS
-function autoSetup(event) {
+async function autoSetup(event) {
 	switch(event.target.innerText) {
 		case "M9100-10 to M9100-11":
 			qtyInput.elements[1].value = M910010to11[0];
 			qtyInput.elements[2].value = M910010to11[1];
-
-			//let fakeEvent = document.createEvent('Event');
-			qtyUpdate(document.createEvent('Event'));
-
 			qtyInput.elements[3].value = M910010to11[2];
 			qtyInput.elements[4].value = M910010to11[3];
+			disableInput(qtyInput.elements[1]);
+			disableInput(qtyInput.elements[2]);
+			disableInput(qtyInput.elements[3]);
+			disableInput(qtyInput.elements[4]);
+
+			//let fakeEvent = document.createEvent('Event');
+			await qtyUpdate(document.createEvent('Event'));
+
 			input.elements[1].checked = M910010to11[4][0];
 			input.elements[2].checked = M910010to11[4][1];
 			input.elements[3].checked = M910010to11[4][2];
@@ -161,6 +224,20 @@ function autoSetup(event) {
 			input.elements[11].checked = M910010to11[7][2];
 			input.elements[12].value = M910010to11[8];
 			input.elements[14].value = M910010to11[9];
+			for (let i=1; i<15; i++) {disableInput(input.elements[i]);}
+			disableInput(input.elements[16]);
+			break;
+
+		case "Custom":
+			disabledArray.forEach((j) => {j.disabled = false;});
+			disabledArray = [];
+			qtyInput.elements[1].value = "";
+			qtyInput.elements[2].value = "";
+			qtyInput.elements[3].value = "";
+			qtyInput.elements[4].value = "";
+
+			//let fakeEvent = document.createEvent('Event');
+			await qtyUpdate(document.createEvent('Event'));
 			break;
 	}
 }
@@ -172,15 +249,6 @@ notesInput.addEventListener('keyup', (event)=>{
 		input.elements[0].focus();
 	}
 });
-
-// RETURNS FILE STREAM OF ACTIVE LOG FILE
-function getLogRequest() {
-	return axios({
-		method: 'get',
-		url: "log.csv",
-		headers: {'Content-Type' : 'application/x-www-form-urlencoded'}
-	});
-}
 
 // INPUT PROCESSING FOR LOG UI SECTION
 async function viewLog(event) {
@@ -202,6 +270,7 @@ async function viewLog(event) {
 					x++;
 				}
 			});
+			toggleVisibility(logOut, x > 0);
 		}
 	}
 }

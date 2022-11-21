@@ -5,7 +5,7 @@ import * as path from 'node:path';
 
 import { greatestLogDate } from './modules/fileDate.js';
 
-const PORT=9615;
+const PORT = 9615;
 const MIME_TYPES = {
   default: 'application/octet-stream',
   html: 'text/html; charset=UTF-8',
@@ -19,6 +19,7 @@ const MIME_TYPES = {
   gif: 'image/gif',
   ico: 'image/x-icon',
   svg: 'image/svg+xml',
+  mp3: 'audio/mp3'
 };
 const STATIC_PATH = path.join(process.cwd(), './static');
 const logFileName = STATIC_PATH + '/logs/' + Date().slice(0,-39).replace(/ /g, "_") + '.csv';

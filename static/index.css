@@ -63,3 +63,21 @@ li {
   background-color: red;
   color: white;
 }
+.hide {
+  visibility: hidden;
+}
+.show {
+  visibility: visible;
+}
+.rw-part {
+  /*overflow: auto;*/
+}
+.checkboxes {
+  /*float: left;*/
+  /*width: 150px;*/
+  overflow: auto;
+}
+.li-div {
+  float: left;
+  margin-right: 10px;
+}
