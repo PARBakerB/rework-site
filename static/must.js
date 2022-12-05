@@ -23,6 +23,7 @@ function updateVariableElements() {
 }
 
 // TAKES DOM ELEMENT OR DOM ELEMENT ARRAY WITH HIDE OR SHOW CLASS AND SWAPS THEM OUT
+// ONLY WORKS ON ELEMENTS WITH VISIBILITY CLASS 'hide' OR 'show'
 function toggleVisibility(domObject, value) {
 	if (Array.isArray(domObject)) {
 		domObject.foreach(j => {
@@ -121,6 +122,15 @@ send.addEventListener('click', () => {
 	input.elements[0].focus();
 });
 
+// HELPER FUNCTION FOR INPUT CYCLE, UPDATES THE VALUES IN checks TO BE RELATIVE TO CURRENT CONTEXT
+function refreshChecks(iter) {
+	let checks = [];
+	for (let x=1; x<4; x++) {
+		checks.push(checkForms[Math.floor(iter/8)].children[x].children[0].children[0].checked);
+	}
+	return checks;
+}
+
 // NAVIGATING BETWEEN INPUTS AND FORM SUBMISSION USING ENTER KEY
 function inputCycle(event) {
 	let index = [...input].indexOf(event.target);
@@ -137,10 +147,7 @@ function inputCycle(event) {
 			if (ii%8 < 3) {
 				index = input.elements[(Math.floor(ii/8)*8)+4].value !== "" ? (Math.floor(ii/8)*8)+5 : (Math.floor(ii/8)*8)+4;
 				ii = index-1;
-				checks = [];
-				for (let x=0; x<3; x++) {
-					checks.push(checkForms[Math.floor(ii/8)].children[x].children[0].checked);
-				}
+				checks = refreshChecks(ii);
 				input.elements[index].focus();
 			}
 			try {
@@ -151,10 +158,7 @@ function inputCycle(event) {
 						index = input.elements[(Math.floor(ii/8)*8)+4].value !== "" ? (Math.floor(ii/8)*8)+5 : (Math.floor(ii/8)*8)+4;
 						ii = index-1;
 					}
-					checks = [];
-					for (let x=0; x<3; x++) {
-						checks.push(checkForms[Math.floor(ii/8)].children[x].children[0].checked);
-					}
+					checks = refreshChecks(ii);
 				}
 				input.elements[index].focus();
 			} catch {
@@ -206,14 +210,11 @@ async function autoSetup(event) {
 			qtyInput.elements[2].value = M910010to11[1];
 			qtyInput.elements[3].value = M910010to11[2];
 			qtyInput.elements[4].value = M910010to11[3];
-			disableInput(qtyInput.elements[1]);
+			/*disableInput(qtyInput.elements[1]);
 			disableInput(qtyInput.elements[2]);
 			disableInput(qtyInput.elements[3]);
-			disableInput(qtyInput.elements[4]);
-
-			//let fakeEvent = document.createEvent('Event');
+			disableInput(qtyInput.elements[4]);*/
 			await qtyUpdate(document.createEvent('Event'));
-
 			input.elements[1].checked = M910010to11[4][0];
 			input.elements[2].checked = M910010to11[4][1];
 			input.elements[3].checked = M910010to11[4][2];
@@ -224,19 +225,38 @@ async function autoSetup(event) {
 			input.elements[11].checked = M910010to11[7][2];
 			input.elements[12].value = M910010to11[8];
 			input.elements[14].value = M910010to11[9];
-			for (let i=1; i<15; i++) {disableInput(input.elements[i]);}
-			disableInput(input.elements[16]);
+			//for (let i=1; i<15; i++) {disableInput(input.elements[i]);}
+			//disableInput(input.elements[16]);
 			break;
-
+		case "Reverse M9100-10 to M9100-11":
+			qtyInput.elements[1].value = M910010to11[0];
+			qtyInput.elements[2].value = M910010to11[1];
+			qtyInput.elements[3].value = M910010to11[3];
+			qtyInput.elements[4].value = M910010to11[2];
+			/*disableInput(qtyInput.elements[1]);
+			disableInput(qtyInput.elements[2]);
+			disableInput(qtyInput.elements[3]);
+			disableInput(qtyInput.elements[4]);*/
+			await qtyUpdate(document.createEvent('Event'));
+			input.elements[1].checked = M910010to11[7][0];
+			input.elements[2].checked = M910010to11[7][1];
+			input.elements[3].checked = M910010to11[7][2];
+			input.elements[4].value = M910010to11[8];
+			input.elements[6].value = M910010to11[9];
+			input.elements[9].checked = M910010to11[4][0];
+			input.elements[10].checked = M910010to11[4][1];
+			input.elements[11].checked = M910010to11[4][2];
+			input.elements[12].value = M910010to11[5];
+			input.elements[14].value = M910010to11[6];
+			//for (let i=1; i<17; i++) {if (i!==7) {disableInput(input.elements[i]);}}
+			break;
 		case "Custom":
-			disabledArray.forEach((j) => {j.disabled = false;});
-			disabledArray = [];
+			//disabledArray.forEach((j) => {j.disabled = false;});
+			//disabledArray = [];
 			qtyInput.elements[1].value = "";
 			qtyInput.elements[2].value = "";
 			qtyInput.elements[3].value = "";
 			qtyInput.elements[4].value = "";
-
-			//let fakeEvent = document.createEvent('Event');
 			await qtyUpdate(document.createEvent('Event'));
 			break;
 	}

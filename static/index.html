@@ -11,6 +11,7 @@
 <body>
 <div class="button-container">
 	<button class="auto-setup-buttons">M9100-10 to M9100-11</button>
+	<button class="auto-setup-buttons">Reverse M9100-10 to M9100-11</button>
 	<button class="auto-setup-buttons">Custom</button>
 </div>
 <div class="generic-container">
@@ -67,6 +68,19 @@
 </div>
 <div class="log-request-container">
 	<h2>Get Log for Label Printing:</h2>
+	
+	<h3>
+		Download a Copy of Active Log File:
+		<hr>
+		<div>
+			<a href="/log.csv">
+				<input type="button" id="logCSV" value="Download">
+			</a>
+		</div>
+		<p><br></p>
+		List Recently Logged Rework Information:
+		<hr>
+	</h3>
 	<h4>
 		<form id="log-request">
 			<div class="log-form">
