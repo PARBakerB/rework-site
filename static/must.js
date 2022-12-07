@@ -14,7 +14,7 @@ var inOut = [0,0];
 var disabledArray = [];
 const assemblyPartNumbers = ['M9100-10','M9100-11','M9110-11','M9110-21'];
 const M910010to11 = [1, 1, "M9100-10", "M9100-11", [true, true, true], "980029758", "POS-TGL-BC1", [true, false, true], "980029756", "20M204DA4"];
-
+const M911011to21 = [1, 2, "M9110-11", "M9110-21", [true, false, true], "980029707", "", [true, true, true], "980029706", "", [true, false, true], "980029757", ""]
 // REFRESH PAGE ELEMENT VARIABLES THAT CHANGE DURING UI INTERACTION
 function updateVariableElements() {
 	inputs = document.getElementsByClassName('inputs');
@@ -210,10 +210,6 @@ async function autoSetup(event) {
 			qtyInput.elements[2].value = M910010to11[1];
 			qtyInput.elements[3].value = M910010to11[2];
 			qtyInput.elements[4].value = M910010to11[3];
-			/*disableInput(qtyInput.elements[1]);
-			disableInput(qtyInput.elements[2]);
-			disableInput(qtyInput.elements[3]);
-			disableInput(qtyInput.elements[4]);*/
 			await qtyUpdate(document.createEvent('Event'));
 			input.elements[1].checked = M910010to11[4][0];
 			input.elements[2].checked = M910010to11[4][1];
@@ -225,18 +221,12 @@ async function autoSetup(event) {
 			input.elements[11].checked = M910010to11[7][2];
 			input.elements[12].value = M910010to11[8];
 			input.elements[14].value = M910010to11[9];
-			//for (let i=1; i<15; i++) {disableInput(input.elements[i]);}
-			//disableInput(input.elements[16]);
 			break;
 		case "Reverse M9100-10 to M9100-11":
 			qtyInput.elements[1].value = M910010to11[0];
 			qtyInput.elements[2].value = M910010to11[1];
 			qtyInput.elements[3].value = M910010to11[3];
 			qtyInput.elements[4].value = M910010to11[2];
-			/*disableInput(qtyInput.elements[1]);
-			disableInput(qtyInput.elements[2]);
-			disableInput(qtyInput.elements[3]);
-			disableInput(qtyInput.elements[4]);*/
 			await qtyUpdate(document.createEvent('Event'));
 			input.elements[1].checked = M910010to11[7][0];
 			input.elements[2].checked = M910010to11[7][1];
@@ -248,8 +238,30 @@ async function autoSetup(event) {
 			input.elements[11].checked = M910010to11[4][2];
 			input.elements[12].value = M910010to11[5];
 			input.elements[14].value = M910010to11[6];
-			//for (let i=1; i<17; i++) {if (i!==7) {disableInput(input.elements[i]);}}
 			break;
+		/*case "M9110-11 to M9110-21":
+			qtyInput.elements[1].value = M911011to21[0];
+			qtyInput.elements[2].value = M911011to21[1];
+			qtyInput.elements[3].value = M911011to21[2];
+			qtyInput.elements[4].value = M911011to21[3];
+			await qtyUpdate(document.createEvent('Event'));
+			input.elements[1].checked = M911011to21[4][0];
+			input.elements[2].checked = M911011to21[4][1];
+			input.elements[3].checked = M911011to21[4][2];
+			input.elements[4].value = M911011to21[5];
+			input.elements[6].value = M911011to21[6];
+			input.elements[9].checked = M911011to21[7][0];
+			input.elements[10].checked = M911011to21[7][1];
+			input.elements[11].checked = M911011to21[7][2];
+			input.elements[12].value = M911011to21[8];
+			input.elements[14].value = M911011to21[9];
+			input.elements[17].value = M911011to21[10][0];
+			input.elements[18].value = M911011to21[10][1];
+			input.elements[19].value = M911011to21[10][2];
+			input.elements[20].value = M911011to21[11];
+			input.elements[22].value = M911011to21[12];
+			break;
+			*/
 		case "Custom":
 			//disabledArray.forEach((j) => {j.disabled = false;});
 			//disabledArray = [];
@@ -285,7 +297,7 @@ async function viewLog(event) {
 			let logArray = log.data.split("\n");
 			let x = 0;
 			logArray.reverse().forEach(j => {
-				if (j !== "" && x < logReqSize && (j.slice(0, j.indexOf(",")) === logReqs[0].value)) {
+				if (j !== "" && x < logReqSize && parseInt((j.slice(0, j.indexOf(","))).replace(/\D/g,'')) === parseInt(logReqs[0].value.replace(/\D/g,''))) {
 					logdiv.innerHTML += ("<li>" + j.split(",")[4] + "</li>");
 					x++;
 				}
