@@ -9,12 +9,13 @@ var checkForms = document.getElementsByClassName('checkboxes');
 const buttons = document.getElementsByClassName("auto-setup-buttons");
 const notesInput = document.getElementById("notes").children[0].children[1];
 const logOut = document.getElementById("log-output");
+const errMsg = document.getElementById("errorMsg");
 
 var inOut = [0,0];
 var disabledArray = [];
 const assemblyPartNumbers = ['M9100-10','M9100-11','M9110-11','M9110-21'];
 const M910010to11 = [1, 1, "M9100-10", "M9100-11", [true, true, true], "980029758", "POS-TGL-BC1", [true, false, true], "980029756", "20M204DA4"];
-const M911011to21 = [1, 2, "M9110-11", "M9110-21", [true, false, true], "980029707", "", [true, true, true], "980029706", "", [true, false, true], "980029757", ""]
+const M911011to21 = [1, 2, "M9110-11", "M9110-21", [true, false, true], "980029707", "TS128GMTE652T-PAR", [true, true, true], "980029706", "TS1GSH64V2B-PAR", [true, false, true], "980029757", "TS256GMTE712A-PAR"]
 // REFRESH PAGE ELEMENT VARIABLES THAT CHANGE DURING UI INTERACTION
 function updateVariableElements() {
 	inputs = document.getElementsByClassName('inputs');
@@ -162,7 +163,13 @@ function inputCycle(event) {
 				}
 				input.elements[index].focus();
 			} catch {
-				postInputs();
+				if (input.elements[0].value !== "") {
+					postInputs();
+					errMsg.innerText = "";
+				} else {
+					playBuzzer();
+					errMsg.innerText = "Please enter an assembly serial number to log a rework.";
+				}
 				// return to first input
 				input.elements[0].focus();
 			}
@@ -239,7 +246,7 @@ async function autoSetup(event) {
 			input.elements[12].value = M910010to11[5];
 			input.elements[14].value = M910010to11[6];
 			break;
-		/*case "M9110-11 to M9110-21":
+		case "M9110-11 to M9110-21":
 			qtyInput.elements[1].value = M911011to21[0];
 			qtyInput.elements[2].value = M911011to21[1];
 			qtyInput.elements[3].value = M911011to21[2];
@@ -255,13 +262,34 @@ async function autoSetup(event) {
 			input.elements[11].checked = M911011to21[7][2];
 			input.elements[12].value = M911011to21[8];
 			input.elements[14].value = M911011to21[9];
-			input.elements[17].value = M911011to21[10][0];
-			input.elements[18].value = M911011to21[10][1];
-			input.elements[19].value = M911011to21[10][2];
+			input.elements[17].checked = M911011to21[10][0];
+			input.elements[18].checked = M911011to21[10][1];
+			input.elements[19].checked = M911011to21[10][2];
 			input.elements[20].value = M911011to21[11];
 			input.elements[22].value = M911011to21[12];
 			break;
-			*/
+		case "Reverse M9110-11 to M9110-21":
+			qtyInput.elements[1].value = M911011to21[1];
+			qtyInput.elements[2].value = M911011to21[0];
+			qtyInput.elements[3].value = M911011to21[3];
+			qtyInput.elements[4].value = M911011to21[2];
+			await qtyUpdate(document.createEvent('Event'));
+			input.elements[1].checked = M911011to21[10][0];
+			input.elements[2].checked = M911011to21[10][1];
+			input.elements[3].checked = M911011to21[10][2];
+			input.elements[4].value = M911011to21[11];
+			input.elements[6].value = M911011to21[12];
+			input.elements[9].checked = M911011to21[7][0];
+			input.elements[10].checked = M911011to21[7][1];
+			input.elements[11].checked = M911011to21[7][2];
+			input.elements[12].value = M911011to21[8];
+			input.elements[14].value = M911011to21[9];
+			input.elements[17].checked = M911011to21[4][0];
+			input.elements[18].checked = M911011to21[4][1];
+			input.elements[19].checked = M911011to21[4][2];
+			input.elements[20].value = M911011to21[5];
+			input.elements[22].value = M911011to21[6];
+			break;
 		case "Custom":
 			//disabledArray.forEach((j) => {j.disabled = false;});
 			//disabledArray = [];
@@ -307,3 +335,17 @@ async function viewLog(event) {
 	}
 }
 Object.values(logReqs).forEach((j)=>{j.addEventListener("keyup",viewLog);});
+/*
+// ADDING DROPDOWN MENUS FOR IN/OUTS WITH MULTIPLE AML LISTINGS
+function addDropDown() {
+	const multAML = ['980029707', '980029706', '980029757'];
+	document.getElementsByClassName("rw-part").forEach(j => {
+		if (multAML.contains(j.children[1].children[0].children[0].children[0].children[0].children[0].value)) {
+
+		}
+	});
+	if (document.getElementsByClassName("rw-part")[0].children[1].children[0].children[0].children[0].children[0].children[0].value) {
+
+	}
+}
+*/
