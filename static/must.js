@@ -10,17 +10,20 @@ const buttons = document.getElementsByClassName("auto-setup-buttons");
 const notesInput = document.getElementById("notes").children[0].children[1];
 const logOut = document.getElementById("log-output");
 const errMsg = document.getElementById("errorMsg");
+let reworkParts = document.getElementsByClassName("rw-part");
 
 var inOut = [0,0];
 var disabledArray = [];
 const assemblyPartNumbers = ['M9100-10','M9100-11','M9110-11','M9110-21'];
 const M910010to11 = [1, 1, "M9100-10", "M9100-11", [true, true, true], "980029758", "POS-TGL-BC1", [true, false, true], "980029756", "20M204DA4"];
 const M911011to21 = [1, 2, "M9110-11", "M9110-21", [true, false, true], "980029707", "TS128GMTE652T-PAR", [true, true, true], "980029706", "TS1GSH64V2B-PAR", [true, false, true], "980029757", "TS256GMTE712A-PAR"]
+
 // REFRESH PAGE ELEMENT VARIABLES THAT CHANGE DURING UI INTERACTION
 function updateVariableElements() {
 	inputs = document.getElementsByClassName('inputs');
 	Object.values(inputs).forEach((j) => {if (j.getAttribute('listener') !== 'true') {j.addEventListener("keydown",inputCycle)}});
 	checkForms = document.getElementsByClassName('checkboxes');
+	reworkParts = document.getElementsByClassName("rw-part");
 }
 
 // TAKES DOM ELEMENT OR DOM ELEMENT ARRAY WITH HIDE OR SHOW CLASS AND SWAPS THEM OUT
@@ -222,11 +225,12 @@ async function autoSetup(event) {
 			input.elements[2].checked = M910010to11[4][1];
 			input.elements[3].checked = M910010to11[4][2];
 			input.elements[4].value = M910010to11[5];
-			input.elements[6].value = M910010to11[6];
 			input.elements[9].checked = M910010to11[7][0];
 			input.elements[10].checked = M910010to11[7][1];
 			input.elements[11].checked = M910010to11[7][2];
 			input.elements[12].value = M910010to11[8];
+			addDropDown();
+			input.elements[6].value = M910010to11[6];
 			input.elements[14].value = M910010to11[9];
 			break;
 		case "Reverse M9100-10 to M9100-11":
@@ -239,11 +243,12 @@ async function autoSetup(event) {
 			input.elements[2].checked = M910010to11[7][1];
 			input.elements[3].checked = M910010to11[7][2];
 			input.elements[4].value = M910010to11[8];
-			input.elements[6].value = M910010to11[9];
 			input.elements[9].checked = M910010to11[4][0];
 			input.elements[10].checked = M910010to11[4][1];
 			input.elements[11].checked = M910010to11[4][2];
 			input.elements[12].value = M910010to11[5];
+			addDropDown();
+			input.elements[6].value = M910010to11[9];
 			input.elements[14].value = M910010to11[6];
 			break;
 		case "M9110-11 to M9110-21":
@@ -256,16 +261,17 @@ async function autoSetup(event) {
 			input.elements[2].checked = M911011to21[4][1];
 			input.elements[3].checked = M911011to21[4][2];
 			input.elements[4].value = M911011to21[5];
-			input.elements[6].value = M911011to21[6];
 			input.elements[9].checked = M911011to21[7][0];
 			input.elements[10].checked = M911011to21[7][1];
 			input.elements[11].checked = M911011to21[7][2];
 			input.elements[12].value = M911011to21[8];
-			input.elements[14].value = M911011to21[9];
 			input.elements[17].checked = M911011to21[10][0];
 			input.elements[18].checked = M911011to21[10][1];
 			input.elements[19].checked = M911011to21[10][2];
 			input.elements[20].value = M911011to21[11];
+			addDropDown();
+			input.elements[6].value = M911011to21[6];
+			input.elements[14].value = M911011to21[9];
 			input.elements[22].value = M911011to21[12];
 			break;
 		case "Reverse M9110-11 to M9110-21":
@@ -278,16 +284,17 @@ async function autoSetup(event) {
 			input.elements[2].checked = M911011to21[10][1];
 			input.elements[3].checked = M911011to21[10][2];
 			input.elements[4].value = M911011to21[11];
-			input.elements[6].value = M911011to21[12];
 			input.elements[9].checked = M911011to21[7][0];
 			input.elements[10].checked = M911011to21[7][1];
 			input.elements[11].checked = M911011to21[7][2];
 			input.elements[12].value = M911011to21[8];
-			input.elements[14].value = M911011to21[9];
 			input.elements[17].checked = M911011to21[4][0];
 			input.elements[18].checked = M911011to21[4][1];
 			input.elements[19].checked = M911011to21[4][2];
 			input.elements[20].value = M911011to21[5];
+			addDropDown();
+			input.elements[6].value = M911011to21[12];
+			input.elements[14].value = M911011to21[9];
 			input.elements[22].value = M911011to21[6];
 			break;
 		case "Custom":
@@ -335,17 +342,33 @@ async function viewLog(event) {
 	}
 }
 Object.values(logReqs).forEach((j)=>{j.addEventListener("keyup",viewLog);});
-/*
+
+function dataListConst(optArr) {
+	let retVal = '';
+	optArr.forEach(j => {
+		retVal += "<option value=\""+j+"\"></option>";
+	});
+	return retVal;
+}
+
 // ADDING DROPDOWN MENUS FOR IN/OUTS WITH MULTIPLE AML LISTINGS
 function addDropDown() {
-	const multAML = ['980029707', '980029706', '980029757'];
-	document.getElementsByClassName("rw-part").forEach(j => {
-		if (multAML.contains(j.children[1].children[0].children[0].children[0].children[0].children[0].value)) {
-
+	const options = {
+		'980029707': ['75130037000', 'TS128GMTE652T-PAR'],
+		'980029706': ['75160129001', 'TS1GSH64V2B-PAR', 'AD4S320038G22-BSSC', 'AD4S320038G22-BHYD', 'D23.27247S.00B', 'TS1GSH64V2B3-PAR'],
+		'980029757': ['TS256GMTE710T-PAR', 'TS256GMTE712A-PAR']
+	};
+	Object.values(reworkParts).forEach(j => {
+		let dropdownInput = j.children[1].children[0].children[2].children[0].children[0].children[0];
+		let liDiv = j.children[1].children[0].children[2].children[0];
+		let parPart = j.children[1].children[0].children[0].children[0].children[0].children[0].value;
+		if (options.hasOwnProperty(parPart)) {
+			let attributeName = Math.floor(Math.random()*50000000) + '';
+			dropdownInput.setAttribute('list', attributeName);
+			let listFormat = "<datalist id=\""+attributeName+"\"></datalist>";
+			liDiv.innerHTML += listFormat;
+			let optionsList = dataListConst(options[parPart]);
+			document.getElementById(attributeName).innerHTML = optionsList;
 		}
 	});
-	if (document.getElementsByClassName("rw-part")[0].children[1].children[0].children[0].children[0].children[0].children[0].value) {
-
-	}
 }
-*/
