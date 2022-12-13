@@ -11,6 +11,20 @@ li {
 #notes label{
   color: red;
 }
+
+.flex-panels {
+  display: flex;
+}
+.panel {
+  flex: 1;
+  min-width: 400px;
+  border: var(--def-border-width) solid rgb(0, 0, 0);
+}
+.weak-panel {
+  flex: 0.7;
+  border: var(--def-border-width) solid rgb(0, 0, 0);
+}
+
 .rework-form {
   padding: 1px;
 }

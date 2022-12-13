@@ -9,101 +9,134 @@
 </head>
 
 <body>
-<div class="button-container">
-	<div>
-		<button class="auto-setup-buttons">M9100-10 to M9100-11</button>
-		<button class="auto-setup-buttons">Reverse M9100-10 to M9100-11</button>
-	</div>
-	<div>
-		<button class="auto-setup-buttons">M9110-11 to M9110-21</button>
-		<button class="auto-setup-buttons">Reverse M9110-11 to M9110-21</button>
-		<button class="auto-setup-buttons">Custom</button>
-	</div>
-</div>
-<div class="generic-container">
-	<h2>Enter Production Order Information:</h2>
-	<form id="qty">
-		<h4>
-		<div class="rework-form">
-			<label>P/O Number:</label><input type="text" class="qtys" required>
-		</div>
-		<div class="rework-form">
-			<label>Qty of parts out:</label><input type="number" class="qtys" required minlength="1" maxlength="2">
-			<label>Qty of parts in:</label><input type="number" class="qtys" required minlength="1" maxlength="2">
-		</div>
-		<div class="rework-form">
-			<label>Assembly P/N From:</label><input type="text" class="qtys" required>
-		</div>
-		<div class="rework-form">
-			<label>Assembly P/N To:</label><input type="text" class="qtys" required>
-		</div>
-		<div class="rework-form">
-			<label>Date:</label><input type="text" class="qtys" required>
-		</div>
-		<div class="initials">
-			Initials of
-			<div class="rework-form">
-				<label>Assembler:</label><input type="text" class="qtys" required>
-				<label>Unit Tester:</label><input type="text" class="qtys" required>
+<div class="flex-panels">
+	<div class="panel">
+		<div class="button-container">
+			<div>
+				<button class="auto-setup-buttons">M9100-10 to M9100-11</button>
+				<button class="auto-setup-buttons">Reverse M9100-10 to M9100-11</button>
 			</div>
-			<div class="rework-form">
-				<label>Auditor:</label><input type="text" class="qtys" required>
+			<div>
+				<button class="auto-setup-buttons">M9110-11 to M9110-21</button>
+				<button class="auto-setup-buttons">Reverse M9110-11 to M9110-21</button>
+				<button class="auto-setup-buttons">Custom</button>
 			</div>
 		</div>
-		</h4>
-	</form>
-</div>
-<div id="errorLightUpWindow" class="specific-container">
-	<h2>Enter Unit Specific Information:</h2>
-	<div id="notes">
-		<label>Entry Notes: (e.g. "Unit replaces: <em>SERIAL</em>")<input type="text" required></label>
-	</div>
-	<h4>
-		<strong><p id="errorMsg"></p></strong>
-		<form id="input">
-			<div class="rework-form">
-				<label>Assembly Serial Number:<input type="text" class="inputs" required></label>
+		<div class="generic-container">
+			<h2>Enter Production Order Information:</h2>
+			<form id="qty">
+				<h4>
+				<div class="rework-form">
+					<label>P/O Number:</label><input type="text" class="qtys" required>
+				</div>
+				<div class="rework-form">
+					<label>Qty of parts out:</label><input type="number" class="qtys" required minlength="1" maxlength="2">
+					<label>Qty of parts in:</label><input type="number" class="qtys" required minlength="1" maxlength="2">
+				</div>
+				<div class="rework-form">
+					<label>Assembly P/N From:</label><input type="text" class="qtys" required>
+				</div>
+				<div class="rework-form">
+					<label>Assembly P/N To:</label><input type="text" class="qtys" required>
+				</div>
+				<div class="rework-form">
+					<label>Date:</label><input type="text" class="qtys" required>
+				</div>
+				<div class="initials">
+					Initials of
+					<div class="rework-form">
+						<label>Assembler:</label><input type="text" class="qtys" required>
+						<label>Unit Tester:</label><input type="text" class="qtys" required>
+					</div>
+					<div class="rework-form">
+						<label>Auditor:</label><input type="text" class="qtys" required>
+					</div>
+				</div>
+				</h4>
+			</form>
+		</div>
+		<div id="errorLightUpWindow" class="specific-container">
+			<h2>Enter Unit Specific Information:</h2>
+			<div id="notes">
+				<label>Entry Notes: (e.g. "Unit replaces: <em>SERIAL</em>")<input type="text" required></label>
 			</div>
-			<div class="rework-form">
-				<ol id="parts"></ol>
+			<h4>
+				<strong><p id="errorMsg"></p></strong>
+				<form id="input">
+					<div class="rework-form">
+						<label>Assembly Serial Number:<input type="text" class="inputs" required></label>
+					</div>
+					<div class="rework-form">
+						<ol id="parts"></ol>
+					</div>
+				</form>
+			</h4>
+			<div class="submit">
+				<input id='send' type="submit" value="Submit">
 			</div>
-		</form>
-	</h4>
-	<div class="submit">
-		<input id='send' type="submit" value="Submit">
+		</div>
+		<div class="log-request-container">
+			<h2>Get Log for Label Printing:</h2>
+			
+			<h3>
+				Download a Copy of Active Log File:
+				<hr>
+				<div>
+					<a href="/log.csv">
+						<input type="button" id="logCSV" value="Download">
+					</a>
+				</div>
+				<p><br></p>
+				List Recently Logged Rework Information:
+				<hr>
+			</h3>
+			<h4>
+				<form id="log-request">
+					<div class="log-form">
+						<label>Prod Number:<input type="text" class="log-requests"></label>
+					</div>
+					<div class="log-form">
+						<label>Number of units:<input type="number" class="log-requests"></label>
+					</div>
+				</form>
+			</h4>
+			<div id="log-output" class="hide">
+				<p>Most Recent Scans at Top:</p>
+				<ol id="log-content">
+				</ol>
+			</div>
+		</div>
 	</div>
-</div>
-<div class="log-request-container">
-	<h2>Get Log for Label Printing:</h2>
-	
-	<h3>
-		Download a Copy of Active Log File:
-		<hr>
+	<div class="weak-panel">
 		<div>
-			<a href="/log.csv">
-				<input type="button" id="logCSV" value="Download">
-			</a>
+			<h2>PAR Part Numbers:</h2>
+			<ul>
+				<li><strong>980029758</strong> <p>PAR Phase 15.6 Rear Customer Display  Blank Panel</p></li>
+				<li><strong>980029756</strong> <p>Phase 2x20 VFD Assembly</p></li>
+				<li><strong>980029707</strong> <p>Phase - NVMe M.2 128GB SSD  2280</p></li>
+				<li><strong>980029706</strong> <p>Phase - SDRAM 8GB DDR4 SO-DIMM 260 pin</p></li>
+				<li><strong>980029757</strong> <p>256 GB M.2 SSD 80 mm (2280) NVMe</p></li>
+			</ul>
+			<h2>MFG Part Numbers:</h2>
+			<ul>
+				<li><strong>POS-TGL-BC1</strong> <p>PAR Phase 15.6 Rear Customer Display  Blank Panel</p></li>
+				<li><strong>20M204DA4</strong> <p>2x20 VFD</p></li>
+				<li><strong>TS128GMTE652T-PAR</strong> <p>128 GB M.2 80mm NVMe SSD</p></li>
+				<li><strong>TS1GSH64V2B-PAR</strong> <p>8 GB RAM DDR4</p></li>
+				<li><strong>TS256GMTE712A-PAR</strong> <p>256 GB M.2 SSD 80 mm (2280) NVMe</p></li>
+				<li><strong>75130037000</strong> <p>SSD - 128GB NVMe M.2 2280</p></li>
+				<li><strong>75160129001</strong> <p>SDRAM 8GB DDR4 SO-DIMM 260</p></li>
+				<li><strong>AD4S320038G22-BSSC</strong> <p>8 GB RAM DDR4</p></li>
+				<li><strong>AD4S320038G22-BHYD</strong> <p>8 GB RAM DDR4</p></li>
+				<li><strong>D23.27247S.00B</strong> <p>8 GB RAM DDR4</p></li>
+				<li><strong>TS1GSH64V2B3-PAR</strong> <p>8 GB RAM DDR4</p></li>
+				<li><strong>TS256GMTE710T-PAR</strong> <p>256 GB M.2 SSD 80 mm (2280) NVMe</p></li>
+			</ul>
 		</div>
-		<p><br></p>
-		List Recently Logged Rework Information:
-		<hr>
-	</h3>
-	<h4>
-		<form id="log-request">
-			<div class="log-form">
-				<label>Prod Number:<input type="text" class="log-requests"></label>
-			</div>
-			<div class="log-form">
-				<label>Number of units:<input type="number" class="log-requests"></label>
-			</div>
-		</form>
-	</h4>
-	<div id="log-output" class="hide">
-		<p>Most Recent Scans at Top:</p>
-		<ol id="log-content">
-		</ol>
 	</div>
 </div>
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script type="module" src="must.js"></script>

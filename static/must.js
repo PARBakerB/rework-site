@@ -1,17 +1,21 @@
+// GLOBAL DOM ELEMENTS
 const send = document.getElementById('send');
 const input = document.getElementById('input');
 const qtyInput = document.getElementById('qty');
 const logReq = document.getElementById('log-request');
-var inputs = document.getElementsByClassName('inputs');
 const qtys = document.getElementsByClassName('qtys');
 const logReqs = document.getElementsByClassName('log-requests');
-var checkForms = document.getElementsByClassName('checkboxes');
 const buttons = document.getElementsByClassName("auto-setup-buttons");
 const notesInput = document.getElementById("notes").children[0].children[1];
 const logOut = document.getElementById("log-output");
 const errMsg = document.getElementById("errorMsg");
-let reworkParts = document.getElementsByClassName("rw-part");
 
+// GLOBAL DOM ELEMENTS THAT CHANGE
+var inputs = document.getElementsByClassName('inputs');
+var checkForms = document.getElementsByClassName('checkboxes');
+var reworkParts = document.getElementsByClassName("rw-part");
+
+// GLOBAL VARIABLES
 var inOut = [0,0];
 var disabledArray = [];
 const assemblyPartNumbers = ['M9100-10','M9100-11','M9110-11','M9110-21'];
@@ -344,9 +348,9 @@ async function viewLog(event) {
 Object.values(logReqs).forEach((j)=>{j.addEventListener("keyup",viewLog);});
 
 function dataListConst(optArr) {
-	let retVal = '';
+	let retVal = '\n';
 	optArr.forEach(j => {
-		retVal += "<option value=\""+j+"\"></option>";
+		retVal += "<option value=\""+j+"\">\n";
 	});
 	return retVal;
 }
