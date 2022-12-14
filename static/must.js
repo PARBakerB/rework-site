@@ -20,7 +20,7 @@ var inOut = [0,0];
 var disabledArray = [];
 const assemblyPartNumbers = ['M9100-10','M9100-11','M9110-11','M9110-21'];
 const M910010to11 = [1, 1, "M9100-10", "M9100-11", [true, true, true], "980029758", "POS-TGL-BC1", [true, false, true], "980029756", "20M204DA4"];
-const M911011to21 = [1, 2, "M9110-11", "M9110-21", [true, false, true], "980029707", "TS128GMTE652T-PAR", [true, true, true], "980029706", "TS1GSH64V2B-PAR", [true, false, true], "980029757", "TS256GMTE712A-PAR"]
+const M911011to21 = [1, 2, "M9110-11", "M9110-21", [true, false, true], "980029707", "TS128GMTE652T-PAR", [true, false, true], "980029706", "TS1GSH64V2B-PAR", [true, false, true], "980029757", "TS256GMTE712A-PAR"]
 
 // REFRESH PAGE ELEMENT VARIABLES THAT CHANGE DURING UI INTERACTION
 function updateVariableElements() {
