@@ -5,6 +5,18 @@
 li {
   padding: 2px;
 }
+button {
+  font-size: 1.5em;
+  margin: 10px;
+}
+.forward-button button {
+  background-color: green;
+  color: white;
+}
+.reverse-button button {
+  background-color: red;
+  color: white;
+}
 #notes input{
   width: 60%;
 }
