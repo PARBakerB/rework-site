@@ -237,7 +237,7 @@ async function autoSetup(event) {
 			input.elements[6].value = M910010to11[6];
 			input.elements[14].value = M910010to11[9];
 			break;
-		case "Reverse M9100-10 to M9100-11":
+		case "M9100-11 to M9100-10":
 			qtyInput.elements[1].value = M910010to11[0];
 			qtyInput.elements[2].value = M910010to11[1];
 			qtyInput.elements[3].value = M910010to11[3];
@@ -278,7 +278,7 @@ async function autoSetup(event) {
 			input.elements[14].value = M911011to21[9];
 			input.elements[22].value = M911011to21[12];
 			break;
-		case "Reverse M9110-11 to M9110-21":
+		case "M9110-21 to M9110-11":
 			qtyInput.elements[1].value = M911011to21[1];
 			qtyInput.elements[2].value = M911011to21[0];
 			qtyInput.elements[3].value = M911011to21[3];
