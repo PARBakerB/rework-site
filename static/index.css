@@ -1,7 +1,6 @@
 :root {
   --def-border-width: 5px;
 }
-
 li {
   padding: 2px;
 }
@@ -17,26 +16,30 @@ button {
   background-color: red;
   color: white;
 }
+.phase-pns {
+  color: rgb(200, 50, 50);
+}
+.ES600-pns {
+  color: rgb(50, 50, 200);
+}
 #notes input{
   width: 60%;
 }
 #notes label{
   color: red;
 }
-
 .flex-panels {
   display: flex;
 }
 .panel {
   flex: 1;
-  min-width: 400px;
+  min-width: 450px;
   border: var(--def-border-width) solid rgb(0, 0, 0);
 }
 .weak-panel {
   flex: 0.7;
   border: var(--def-border-width) solid rgb(0, 0, 0);
 }
-
 .rework-form {
   padding: 1px;
 }

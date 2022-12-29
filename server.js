@@ -4,6 +4,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { greatestLogDate } from './modules/fileDate.js';
+import { getModel, compareModels, getMFG } from './modules/partObjects.js';
 
 const PORT = 9615;
 const MIME_TYPES = {
@@ -60,13 +61,49 @@ const postResponse = async (req, res) => {
 	return { found, ext, stream };
 };
 const fileServ = async (req, res) => {
-	const file = req.method === 'POST' ? await postResponse(req, res) : await getResponse(req.url);
-	//const file = await prepareResponse(req, res);
-	const statusCode = file.found ? 200 : 404;
-	const mimeType = MIME_TYPES[file.ext] || MIME_TYPES.default;
-	res.writeHead(statusCode, { 'Content-Type': mimeType });
-	file.stream.pipe(res);
-	console.log(`${req.method} ${req.url} ${statusCode}`);
+	if (req.url === '/420compare420') {
+		let response = "";
+		req.on('data', async j => {
+			response = j.toString('utf8');
+			response = JSON.parse(response);
+		});
+		req.on('end', async () => {
+			response = compareModels(response.fakeTerm, await getModel(response.modelNumber));
+			res.writeHead(200, { 'Content-Type': 'application/json' });
+			res.write(JSON.stringify(response));
+			res.end();
+		});
+	} else if (req.url === '/420getModel420') {
+		let response = "";
+		req.on('data', async j => {
+			response = j.toString('utf8');
+		});
+		req.on('end', async () => {
+			response = await getModel(response);
+			res.writeHead(200, { 'Content-Type': 'application/json' });
+			res.write(JSON.stringify(response));
+			res.end();
+		});
+	} else if (req.url === '/420getMFG420') {
+		let response = "";
+		req.on('data', async j => {
+			response = j.toString('utf8');
+			console.log(response);
+		});
+		req.on('end', async () => {
+			response = await getMFG(response);
+			res.writeHead(200, { 'Content-Type': 'application/json' });
+			res.write(JSON.stringify(response));
+			res.end();
+		});
+	} else {
+		const file = req.method === 'POST' ? await postResponse(req, res) : await getResponse(req.url);
+		const statusCode = file.found ? 200 : 404;
+		const mimeType = MIME_TYPES[file.ext] || MIME_TYPES.default;
+		res.writeHead(statusCode, { 'Content-Type': mimeType });
+		file.stream.pipe(res);
+		console.log(`${req.method} ${req.url} ${statusCode}`);
+	}
 };
 
 https.createServer(options, fileServ).listen(PORT);

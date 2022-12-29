@@ -77,6 +77,34 @@ async function postRework(rwdata) {
 	});
 }
 
+// ASK WHICH PARTS NEED TO BE CHANGED FOR REWORK
+async function howRework(ft, mn) {
+	let dataObj = {fakeTerm: ft, modelNumber: mn}
+	return ( await axios({
+		method: 'post',
+		url: '420compare420',
+		data: JSON.stringify(dataObj)
+	})).data;
+}
+
+// GET GENERIC DESCRIPTOR FOR A TERMINAL MODEL NUMBER
+async function getTermJSON(mn) {
+	return ( await axios ({
+		method: 'post',
+		url: '420getModel420',
+		data: mn
+	})).data;
+}
+
+// GET MANUFACTURER PART NUMBERS FOR A PAR PART
+async function getMFG(mn) {
+	return ( await axios ({
+		method: 'post',
+		url: '420getMFG420',
+		data: mn
+	})).data;
+}
+
 // RETURNS FILE STREAM OF ACTIVE LOG FILE
 function getLogRequest() {
 	return axios({
@@ -117,7 +145,7 @@ function postInputs() {
 		if (!(i%5 === 0 || i%5 === 2)) {j.value='';}
 		i++;
 	});
-	rwdata[i+1] = notesInput.value;
+	rwdata[i] = notesInput.value;
 	notesInput.value = '';
 	let statarray = [qtyInput.elements[0].value,qtyInput.elements[5].value,qtyInput.elements[3].value,
 		qtyInput.elements[4].value,rwdata[0],qtyInput.elements[6].value, 
@@ -233,9 +261,9 @@ async function autoSetup(event) {
 			input.elements[10].checked = M910010to11[7][1];
 			input.elements[11].checked = M910010to11[7][2];
 			input.elements[12].value = M910010to11[8];
-			addDropDown();
 			input.elements[6].value = M910010to11[6];
 			input.elements[14].value = M910010to11[9];
+			addDropDown();
 			break;
 		case "M9100-11 to M9100-10":
 			qtyInput.elements[1].value = M910010to11[0];
@@ -251,9 +279,9 @@ async function autoSetup(event) {
 			input.elements[10].checked = M910010to11[4][1];
 			input.elements[11].checked = M910010to11[4][2];
 			input.elements[12].value = M910010to11[5];
-			addDropDown();
 			input.elements[6].value = M910010to11[9];
 			input.elements[14].value = M910010to11[6];
+			addDropDown();
 			break;
 		case "M9110-11 to M9110-21":
 			qtyInput.elements[1].value = M911011to21[0];
@@ -273,10 +301,10 @@ async function autoSetup(event) {
 			input.elements[18].checked = M911011to21[10][1];
 			input.elements[19].checked = M911011to21[10][2];
 			input.elements[20].value = M911011to21[11];
-			addDropDown();
 			input.elements[6].value = M911011to21[6];
 			input.elements[14].value = M911011to21[9];
 			input.elements[22].value = M911011to21[12];
+			addDropDown();
 			break;
 		case "M9110-21 to M9110-11":
 			qtyInput.elements[1].value = M911011to21[1];
@@ -296,10 +324,10 @@ async function autoSetup(event) {
 			input.elements[18].checked = M911011to21[4][1];
 			input.elements[19].checked = M911011to21[4][2];
 			input.elements[20].value = M911011to21[5];
-			addDropDown();
 			input.elements[6].value = M911011to21[12];
 			input.elements[14].value = M911011to21[9];
 			input.elements[22].value = M911011to21[6];
+			addDropDown();
 			break;
 		case "Custom":
 			//disabledArray.forEach((j) => {j.disabled = false;});
@@ -347,6 +375,7 @@ async function viewLog(event) {
 }
 Object.values(logReqs).forEach((j)=>{j.addEventListener("keyup",viewLog);});
 
+// HELPER FUNCTION FOR addDropDown(), TAKES AN ARRAY OF VALUES AND FORMATS AS A DATALIST
 function dataListConst(optArr) {
 	let retVal = '\n';
 	optArr.forEach(j => {
@@ -356,23 +385,44 @@ function dataListConst(optArr) {
 }
 
 // ADDING DROPDOWN MENUS FOR IN/OUTS WITH MULTIPLE AML LISTINGS
-function addDropDown() {
-	const options = {
-		'980029707': ['75130037000', 'TS128GMTE652T-PAR'],
-		'980029706': ['75160129001', 'TS1GSH64V2B-PAR', 'AD4S320038G22-BSSC', 'AD4S320038G22-BHYD', 'D23.27247S.00B', 'TS1GSH64V2B3-PAR'],
-		'980029757': ['TS256GMTE710T-PAR', 'TS256GMTE712A-PAR']
-	};
-	Object.values(reworkParts).forEach(j => {
+async function addDropDown() {
+	let dropdownValueMaintainer = await Promise.all(Object.values(reworkParts).map(async j => {
 		let dropdownInput = j.children[1].children[0].children[2].children[0].children[0].children[0];
+		let dropdownValue = dropdownInput.value;
 		let liDiv = j.children[1].children[0].children[2].children[0];
 		let parPart = j.children[1].children[0].children[0].children[0].children[0].children[0].value;
-		if (options.hasOwnProperty(parPart)) {
+		let mfgPart = await getMFG(parPart);
+		if (mfgPart.length !== 0) {
 			let attributeName = Math.floor(Math.random()*50000000) + '';
 			dropdownInput.setAttribute('list', attributeName);
 			let listFormat = "<datalist id=\""+attributeName+"\"></datalist>";
 			liDiv.innerHTML += listFormat;
-			let optionsList = dataListConst(options[parPart]);
+			let optionsList = dataListConst(mfgPart);
 			document.getElementById(attributeName).innerHTML = optionsList;
 		}
+		return dropdownValue;
+	}));
+	let iter = 0;
+	Object.values(reworkParts).forEach(j => {
+		let dropdownInput = j.children[1].children[0].children[2].children[0].children[0].children[0];
+		dropdownInput.value = dropdownValueMaintainer[iter];
+		iter++;
 	});
 }
+
+// HOWREWORK DEMONSTRATED USE
+// let resdata = await howRework(
+// 	{
+// 		model: "M6150",
+// 		ram: "980027040",
+// 		storage: "980027028",
+// 		pedestal: "980027063",
+// 		cust_dis: "",
+// 		msr: ""
+// 	},
+// 	"M6150-02"
+// );
+// console.log(resdata.ram[0]);
+
+
+//console.log(await getMFG("980029757"));
