@@ -4,7 +4,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { greatestLogDate } from './modules/fileDate.js';
-import { getModel, compareModels, getMFG } from './modules/partObjects.js';
+import { getModel, compareModels, getMFG, getProdBom } from './modules/partObjects.js';
 
 const PORT = 9615;
 const MIME_TYPES = {
@@ -81,17 +81,26 @@ const fileServ = async (req, res) => {
 		req.on('end', async () => {
 			response = await getModel(response);
 			res.writeHead(200, { 'Content-Type': 'application/json' });
-			res.write(JSON.stringify(response));
 			res.end();
 		});
 	} else if (req.url === '/420getMFG420') {
 		let response = "";
 		req.on('data', async j => {
 			response = j.toString('utf8');
-			console.log(response);
 		});
 		req.on('end', async () => {
 			response = await getMFG(response);
+			res.writeHead(200, { 'Content-Type': 'application/json' });
+			res.write(JSON.stringify(response));
+			res.end();
+		});
+	} else if (req.url === '/420getPROD420') {
+		let response = "";
+		req.on('data', async j => {
+			response = j.toString('utf8');
+		});
+		req.on('end', async () => {
+			response = await getProdBom(response);
 			res.writeHead(200, { 'Content-Type': 'application/json' });
 			res.write(JSON.stringify(response));
 			res.end();

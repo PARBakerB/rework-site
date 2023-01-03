@@ -1,5 +1,25 @@
 import * as fs from 'node:fs';
-import * as readline from 'node:readline';
+//import * as readline from 'node:readline';
+
+import axios from 'axios';
+axios.defaults.withCredentials = true;
+
+// RETURNS A LIST OF ITEMS ON BOM OF A PRODUCTION ORDER
+async function getProdBom (prodNumber) {
+    // Use this link to get a top level of queryable data https://partech.operations.dynamics.com/data/
+    // Use this link to get a BOM for PROD-011286 https://partech.operations.dynamics.com/data/ProductionOrderBillOfMaterialLines?$filter=ProductionOrderNumber eq 'PROD-011286'
+    const prodBomGetterLink = (pn) => {
+        return 'https://partech.operations.dynamics.com/data/ProductionOrderBillOfMaterialLines?$filter=ProductionOrderNumber eq \''+ pn + '\'';
+    }
+    var config = {
+      method: 'get',
+      url: prodBomGetterLink(prodNumber),
+      headers: { 
+        'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ii1LSTNROW5OUjdiUm9meG1lWm9YcWJIWkdldyIsImtpZCI6Ii1LSTNROW5OUjdiUm9meG1lWm9YcWJIWkdldyJ9.eyJhdWQiOiJodHRwczovL3BhcnRlY2gub3BlcmF0aW9ucy5keW5hbWljcy5jb20vIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvMjIyZDhlMWYtOTM3OS00OWYxLThmNGUtY2EyNmQxYzI0NjAyLyIsImlhdCI6MTY3Mjc3MDQ5MywibmJmIjoxNjcyNzcwNDkzLCJleHAiOjE2NzI3NzQ5MjgsImFjciI6IjEiLCJhaW8iOiJBVlFBcS84VEFBQUFNVzZPbFpocG1lL0ovSnJLQVFQMGFsWjZLVnlpL25sb21ON3JxR0I1bTAzTE44Vk1rVVd4Sk5QalNJVnlveXN2ZVJBeEpKRGdJR1NWd0hrcjFLaDF1cy9YUHhVZ3hjbkNEcG1idXJqNFpwRT0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiNTFmODE0ODktMTJlZS00YTllLWFhYWUtYTI1OTFmNDU5ODdkIiwiYXBwaWRhY3IiOiIwIiwiZmFtaWx5X25hbWUiOiJCYWtlciIsImdpdmVuX25hbWUiOiJCcmV0dCIsImlwYWRkciI6IjE5Mi4xMzMuNjMuNSIsIm5hbWUiOiJCcmV0dCBCYWtlciIsIm9pZCI6IjIwZjM5YzM1LTI2ZTUtNGIwZC1iNzFmLTE2ZTFjNTI4ZDNjZSIsIm9ucHJlbV9zaWQiOiJTLTEtNS0yMS0zODUwNDEyNjE1LTM3MDg0NzE3NDUtMTI1MTc4MTc3LTM5MzY0IiwicHVpZCI6IjEwMDMyMDAwREM1OEM2NDIiLCJyaCI6IjAuQVJ3QUg0NHRJbm1UOFVtUFRzb20wY0pHQWhVQUFBQUFBQUFBd0FBQUFBQUFBQUFjQU40LiIsInNjcCI6InVzZXJfaW1wZXJzb25hdGlvbiIsInN1YiI6IjBTY21qZlduVHRXN1lwcm9CMlY5dU5QMmVHbE1YOU1TZktNMm1jcWFwZEUiLCJ0aWQiOiIyMjJkOGUxZi05Mzc5LTQ5ZjEtOGY0ZS1jYTI2ZDFjMjQ2MDIiLCJ1bmlxdWVfbmFtZSI6IkJyZXR0X0Jha2VyQHBhcnRlY2guY29tIiwidXBuIjoiQnJldHRfQmFrZXJAcGFydGVjaC5jb20iLCJ1dGkiOiIzTUdOWUlfUVVFLV9uU2NkTHdQV0FRIiwidmVyIjoiMS4wIn0.UTXBY5jjSzD7vvCJ1ZqC7xnBqmqOOQNg_llR-KulGS3i0FSiYGNIP7cGmalsKOkjR8UWqODRW2kXkQhNNzfIGOu4u_h8AUrEdtltR7pZ8puDACT47xp4IcEWYMVdBBREQKXNey3yAFqNduWoVa3FpXHHpKF86A9SXTu7ijGkJnusXO3e-Ze-js4LH3MOC_EbPIeXmsrsPsN6DH5P1KTjbYCCDnmQXl8alxrMo_ThdtfudtdKxeM1GH1BXc9K1IvJwT3op8q--hQE9Z8yjAlwh8r1402vpOgCdpK11sN_8pcbYlOeGPUv8dU2YeUP_1FNNpGxYavOWtBE_3g_CHUjwA'
+      }
+    };
+    return (await axios(config)).data.value;//.then(function (response) {
+}
 
 // RETURNS A LIST OF MANUFACTURER PART NUMBERS FOR A GIVEN PAR PART
 async function getMFG (parPart) {
@@ -104,5 +124,9 @@ async function createModel () {
 }
 
 //createModel();
+// console.log(typeof(await getProdBom('PROD-030324')));
+// fs.writeFile('./prodbom.json',JSON.stringify(await getProdBom('PROD-030324')), (err)=>{
+//     if (err) throw err;
+// });
 
-export { getMFG, getModel, compareModels }
+export { getMFG, getModel, compareModels, getProdBom }

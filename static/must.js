@@ -105,6 +105,15 @@ async function getMFG(mn) {
 	})).data;
 }
 
+// GET PROD BOM
+async function getProdBom(mn) {
+	return ( await axios ({
+		method: 'post',
+		url: '420getPROD420',
+		data: mn
+	})).data;
+}
+
 // RETURNS FILE STREAM OF ACTIVE LOG FILE
 function getLogRequest() {
 	return axios({
@@ -409,6 +418,13 @@ async function addDropDown() {
 		iter++;
 	});
 }
+
+
+(await getProdBom('PROD-011286')).forEach((j)=>{
+	console.log(j['ItemNumber']);
+	console.log(j['BOMLineQuantity']);
+});
+
 
 // HOWREWORK DEMONSTRATED USE
 // let resdata = await howRework(
