@@ -182,6 +182,7 @@ function inputCycle(event) {
 	let ii = index-1 > -1 ? index-1 : 0;
 	let checks = [];
 	if (event.key==="Enter") {
+		addDropDown();
 		if (index === 0 && assemblyPartNumbers.includes(input.elements[index].value.toUpperCase())) {
 			playBuzzer();
 			input.elements[index].value = '';
@@ -419,11 +420,11 @@ async function addDropDown() {
 	});
 }
 
-
-(await getProdBom('PROD-011286')).forEach((j)=>{
-	console.log(j['ItemNumber']);
-	console.log(j['BOMLineQuantity']);
-});
+// getProdBom demontsrated use
+// (await getProdBom('PROD-011286')).forEach((j)=>{
+// 	console.log(j['ItemNumber']);
+// 	console.log(j['BOMLineQuantity']);
+// });
 
 
 // HOWREWORK DEMONSTRATED USE
