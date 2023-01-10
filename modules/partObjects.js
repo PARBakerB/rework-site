@@ -12,7 +12,7 @@ async function getAccess() {
         form: {
             grant_type: 'client_credentials',
             client_secret: '',
-            client_id: '51f81489-12ee-4a9e-aaae-a2591f45987d',
+            client_id: '',
             resource: 'https://partech.operations.dynamics.com/'
         }
 	})).data
@@ -31,7 +31,7 @@ async function getProdBom (prodNumber) {
       url: prodBomGetterLink(prodNumber),
       // Authorization line will need to be replaced with a variable set by getAccess
       headers: { 
-        'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ii1LSTNROW5OUjdiUm9meG1lWm9YcWJIWkdldyIsImtpZCI6Ii1LSTNROW5OUjdiUm9meG1lWm9YcWJIWkdldyJ9.eyJhdWQiOiJodHRwczovL3BhcnRlY2gub3BlcmF0aW9ucy5keW5hbWljcy5jb20vIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvMjIyZDhlMWYtOTM3OS00OWYxLThmNGUtY2EyNmQxYzI0NjAyLyIsImlhdCI6MTY3Mjg0MzUzMywibmJmIjoxNjcyODQzNTMzLCJleHAiOjE2NzI4NDgzOTksImFjciI6IjEiLCJhaW8iOiJBVlFBcS84VEFBQUFzL2doUEhYbENUZXZwRlp1a0ZvbFNvYUVUVW9oQ1ZzS212MjJsK3M1Q2pUUC9ickpIaUNYb1djcjRZUGRoeFhTSU5rdzdCL29iVG5Ha0plUElNalJXRDFaVkxPTUdLanNNUDR1a0xUcWFpRT0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiNTFmODE0ODktMTJlZS00YTllLWFhYWUtYTI1OTFmNDU5ODdkIiwiYXBwaWRhY3IiOiIwIiwiZmFtaWx5X25hbWUiOiJCYWtlciIsImdpdmVuX25hbWUiOiJCcmV0dCIsImlwYWRkciI6IjE5Mi4xMzMuNjMuNSIsIm5hbWUiOiJCcmV0dCBCYWtlciIsIm9pZCI6IjIwZjM5YzM1LTI2ZTUtNGIwZC1iNzFmLTE2ZTFjNTI4ZDNjZSIsIm9ucHJlbV9zaWQiOiJTLTEtNS0yMS0zODUwNDEyNjE1LTM3MDg0NzE3NDUtMTI1MTc4MTc3LTM5MzY0IiwicHVpZCI6IjEwMDMyMDAwREM1OEM2NDIiLCJyaCI6IjAuQVJ3QUg0NHRJbm1UOFVtUFRzb20wY0pHQWhVQUFBQUFBQUFBd0FBQUFBQUFBQUFjQU40LiIsInNjcCI6InVzZXJfaW1wZXJzb25hdGlvbiIsInN1YiI6IjBTY21qZlduVHRXN1lwcm9CMlY5dU5QMmVHbE1YOU1TZktNMm1jcWFwZEUiLCJ0aWQiOiIyMjJkOGUxZi05Mzc5LTQ5ZjEtOGY0ZS1jYTI2ZDFjMjQ2MDIiLCJ1bmlxdWVfbmFtZSI6IkJyZXR0X0Jha2VyQHBhcnRlY2guY29tIiwidXBuIjoiQnJldHRfQmFrZXJAcGFydGVjaC5jb20iLCJ1dGkiOiJnMDJ3enFwMTZFYVM3a0I1TXdLWEFRIiwidmVyIjoiMS4wIn0.INWB79mRPtRkY-jsnJMiTZEmSia5OmBiui1F6-ZKZYoLNSEsj7Zz6L5IL-dCIXBWltSvdp-e2IofVNLooTEknlF5Ng6sjPRV-aIn-K2_IBYhD48KruZta-YebeSnaV_BBHD4UN129XsmQ7Fsb822J6NsObaxw8lBkHty3SvqZhJB70OOS8iDOnuB9LCP7XqHr3X0g6eyMsEismq3Jd5nMmS5WNJP0YGB2xozK32eKFWxYAR8omuuw3maeEJ5rgubhQs8ORlWRI7I6_BF9HhPYiU66xwOarJpr4lphmTYByD1wsBpW6HeW0abhp1pkHjiq3F6kcEQiWtaAaYpFjAzHA'
+        'Authorization': 'Bearer *bearercode*'
       }
     };
     return (await axios(config)).data.value;//.then(function (response) {
