@@ -229,28 +229,49 @@ async function qtyUpdate(event) {
 		let index = [...qtyInput].indexOf(event.target);
 		if (index <= 7) {qtyInput.elements[index + 1].focus();}
 		else {input.elements[0].focus();}
-	}
-	if (qtyInput.elements[1].value !== "" || qtyInput.elements[2].value !== "") {
-		let qty1 = qtyInput.elements[1].value !== "" ? parseInt(qtyInput.elements[1].value) : 0;
-		let qty2 = qtyInput.elements[2].value !== "" ? parseInt(qtyInput.elements[2].value) : 0;
-		let po = await getFile("PartsOut.html");
-		let pi =  await getFile("PartsIn.html");
-		let partOutInputs = po.data;
-		let partInInputs = pi.data;
-		let partArray = new Array(qty1).fill(partOutInputs).concat(new Array(qty2).fill(partInInputs));
-		if (inOut[0] !== qty1 || inOut[1] !== qty2) {
-			document.getElementById('parts').innerHTML=partArray.join("");
-			inOut[0] = qty1;
-			inOut[1] = qty2;
+		if (qtyInput.elements[1].value !== "" || qtyInput.elements[2].value !== "") {
+			let qty1 = qtyInput.elements[1].value !== "" ? parseInt(qtyInput.elements[1].value) : 0;
+			let qty2 = qtyInput.elements[2].value !== "" ? parseInt(qtyInput.elements[2].value) : 0;
+			let po = await getFile("PartsOut.html");
+			let pi =  await getFile("PartsIn.html");
+			let partOutInputs = po.data;
+			let partInInputs = pi.data;
+			let partArray = new Array(qty1).fill(partOutInputs).concat(new Array(qty2).fill(partInInputs));
+			if (inOut[0] !== qty1 || inOut[1] !== qty2) {
+				document.getElementById('parts').innerHTML=partArray.join("");
+				inOut[0] = qty1;
+				inOut[1] = qty2;
+			}
+			updateVariableElements();
 		}
-		updateVariableElements();
+		else {
+			document.getElementById('parts').innerHTML="";
+			inOut[0] = 0;
+			inOut[1] = 0;
+			updateVariableElements();
+		}
 	}
-	else {
-		document.getElementById('parts').innerHTML="";
-		inOut[0] = 0;
-		inOut[1] = 0;
-		updateVariableElements();
-	}
+	// if (qtyInput.elements[1].value !== "" || qtyInput.elements[2].value !== "") {
+	// 	let qty1 = qtyInput.elements[1].value !== "" ? parseInt(qtyInput.elements[1].value) : 0;
+	// 	let qty2 = qtyInput.elements[2].value !== "" ? parseInt(qtyInput.elements[2].value) : 0;
+	// 	let po = await getFile("PartsOut.html");
+	// 	let pi =  await getFile("PartsIn.html");
+	// 	let partOutInputs = po.data;
+	// 	let partInInputs = pi.data;
+	// 	let partArray = new Array(qty1).fill(partOutInputs).concat(new Array(qty2).fill(partInInputs));
+	// 	if (inOut[0] !== qty1 || inOut[1] !== qty2) {
+	// 		document.getElementById('parts').innerHTML=partArray.join("");
+	// 		inOut[0] = qty1;
+	// 		inOut[1] = qty2;
+	// 	}
+	// 	updateVariableElements();
+	// }
+	// else {
+	// 	document.getElementById('parts').innerHTML="";
+	// 	inOut[0] = 0;
+	// 	inOut[1] = 0;
+	// 	updateVariableElements();
+	// }
 }
 Object.values(qtys).forEach((j) => {j.addEventListener("keyup",qtyUpdate)});
 
