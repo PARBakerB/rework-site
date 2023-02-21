@@ -1,3 +1,6 @@
+#certs
+STAR_partech_com.*
+
 # Logs
 logs
 *.log
