@@ -176,6 +176,20 @@ function refreshChecks(iter) {
 	return checks;
 }
 
+//MISTAKEN SCAN ERROR DETECTION
+function scanErrorDetect(index) {
+	let modelIn = qtyInput[3].value;
+	console.log(modelIn);
+	let misScans = assemblyPartNumbers.concat([modelIn]);
+	let wrongItemScanned = misScans.includes(input.elements[index].value.toUpperCase());
+	if (index === 0 && wrongItemScanned) {
+		playBuzzer();
+		input.elements[index].value = '';
+		document.getElementById("errorLightUpWindow").classList.add("error-container");
+	}
+	return index === 0 && wrongItemScanned;
+}
+
 // NAVIGATING BETWEEN INPUTS AND FORM SUBMISSION USING ENTER KEY
 function inputCycle(event) {
 	let index = [...input].indexOf(event.target);
@@ -183,12 +197,7 @@ function inputCycle(event) {
 	let checks = [];
 	if (event.key==="Enter") {
 		addDropDown();
-		if (index === 0 && assemblyPartNumbers.includes(input.elements[index].value.toUpperCase())) {
-			playBuzzer();
-			input.elements[index].value = '';
-			document.getElementById("errorLightUpWindow").classList.add("error-container");
-		}
-		else {
+		if (!scanErrorDetect(index)) {
 			document.getElementById("errorLightUpWindow").classList.remove("error-container");
 			if (ii%8 < 3) {
 				index = input.elements[(Math.floor(ii/8)*8)+4].value !== "" ? (Math.floor(ii/8)*8)+5 : (Math.floor(ii/8)*8)+4;
@@ -229,7 +238,9 @@ async function qtyUpdate(event) {
 		let index = [...qtyInput].indexOf(event.target);
 		if (index <= 7) {qtyInput.elements[index + 1].focus();}
 		else {input.elements[0].focus();}
-		if (qtyInput.elements[1].value !== "" || qtyInput.elements[2].value !== "") {
+		let isQty = [1, 2].includes(index);
+		let checkQtys = (qtyInput.elements[1].value !== "" || qtyInput.elements[2].value !== "");
+		if (isQty && checkQtys) {
 			let qty1 = qtyInput.elements[1].value !== "" ? parseInt(qtyInput.elements[1].value) : 0;
 			let qty2 = qtyInput.elements[2].value !== "" ? parseInt(qtyInput.elements[2].value) : 0;
 			let po = await getFile("PartsOut.html");
@@ -244,34 +255,13 @@ async function qtyUpdate(event) {
 			}
 			updateVariableElements();
 		}
-		else {
+		else if (!checkQtys) {
 			document.getElementById('parts').innerHTML="";
 			inOut[0] = 0;
 			inOut[1] = 0;
 			updateVariableElements();
 		}
 	}
-	// if (qtyInput.elements[1].value !== "" || qtyInput.elements[2].value !== "") {
-	// 	let qty1 = qtyInput.elements[1].value !== "" ? parseInt(qtyInput.elements[1].value) : 0;
-	// 	let qty2 = qtyInput.elements[2].value !== "" ? parseInt(qtyInput.elements[2].value) : 0;
-	// 	let po = await getFile("PartsOut.html");
-	// 	let pi =  await getFile("PartsIn.html");
-	// 	let partOutInputs = po.data;
-	// 	let partInInputs = pi.data;
-	// 	let partArray = new Array(qty1).fill(partOutInputs).concat(new Array(qty2).fill(partInInputs));
-	// 	if (inOut[0] !== qty1 || inOut[1] !== qty2) {
-	// 		document.getElementById('parts').innerHTML=partArray.join("");
-	// 		inOut[0] = qty1;
-	// 		inOut[1] = qty2;
-	// 	}
-	// 	updateVariableElements();
-	// }
-	// else {
-	// 	document.getElementById('parts').innerHTML="";
-	// 	inOut[0] = 0;
-	// 	inOut[1] = 0;
-	// 	updateVariableElements();
-	// }
 }
 Object.values(qtys).forEach((j) => {j.addEventListener("keyup",qtyUpdate)});
 
@@ -446,7 +436,6 @@ async function addDropDown() {
 // 	console.log(j['ItemNumber']);
 // 	console.log(j['BOMLineQuantity']);
 // });
-
 
 // HOWREWORK DEMONSTRATED USE
 // let resdata = await howRework(
