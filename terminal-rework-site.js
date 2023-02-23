@@ -25,8 +25,8 @@ const MIME_TYPES = {
 const STATIC_PATH = path.join(process.cwd(), './static');
 const logFileName = STATIC_PATH + '/logs/' + Date().slice(0,-39).replace(/ /g, "_") + '.csv';
 const options = {
-	key: fs.readFileSync('./key.pem'),
-	cert: fs.readFileSync('./cert.pem')
+	key: fs.readFileSync('./STAR_partech_com.key'),
+	cert: fs.readFileSync('./STAR_partech_com.crt')
 };
 
 const toBool = [() => true, () => false];
