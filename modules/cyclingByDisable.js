@@ -1,4 +1,13 @@
 // DISABLE INPUTS BASED ON CHECKBOXES
+document.getElementsByClassName("rw-part");
+
+
+
+
+
+
+
+/*
 const input = document.getElementById('input');
 const inputText = Object.values(input.elements).filter(j => j.type === "text").slice(1);
 const inputChecks = Object.values(input.elements).filter(j => j.type === "checkbox");
@@ -42,3 +51,4 @@ function mapChecksToInputs() {
 		}
 	});
 }
+*/

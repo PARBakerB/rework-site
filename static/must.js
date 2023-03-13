@@ -234,11 +234,12 @@ Object.values(inputs).forEach((j) => {j.addEventListener("keydown",inputCycle)})
 
 // GRAB QTY INPUTS ON UPDATE, CYCLE THROUGH FORM ON ENTER
 async function qtyUpdate(event) {
-	if (event.key==="Enter") {
+	if (event.key==="Enter" || event.target == null) {
+		console.log(event.target);
 		let index = [...qtyInput].indexOf(event.target);
 		if (index <= 7) {qtyInput.elements[index + 1].focus();}
 		else {input.elements[0].focus();}
-		let isQty = [1, 2].includes(index);
+		let isQty = [1, 2].includes(index) || event.target == null;
 		let checkQtys = (qtyInput.elements[1].value !== "" || qtyInput.elements[2].value !== "");
 		if (isQty && checkQtys) {
 			let qty1 = qtyInput.elements[1].value !== "" ? parseInt(qtyInput.elements[1].value) : 0;
