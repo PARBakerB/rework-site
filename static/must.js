@@ -235,7 +235,6 @@ Object.values(inputs).forEach((j) => {j.addEventListener("keydown",inputCycle)})
 // GRAB QTY INPUTS ON UPDATE, CYCLE THROUGH FORM ON ENTER
 async function qtyUpdate(event) {
 	if (event.key==="Enter" || event.target == null) {
-		console.log(event.target);
 		let index = [...qtyInput].indexOf(event.target);
 		if (index <= 7) {qtyInput.elements[index + 1].focus();}
 		else {input.elements[0].focus();}

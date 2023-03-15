@@ -1,54 +1,28 @@
 // DISABLE INPUTS BASED ON CHECKBOXES
-document.getElementsByClassName("rw-part");
+let parts = document.getElementsByClassName("rw-part");
+let partStructs = [];
 
-
-
-
-
-
-
-/*
-const input = document.getElementById('input');
-const inputText = Object.values(input.elements).filter(j => j.type === "text").slice(1);
-const inputChecks = Object.values(input.elements).filter(j => j.type === "checkbox");
-function mapChecksToInputs() {
-	let checkMap = {
-		0: 1,
-		1: 3,
-		2: 4
-	};
-	Object.values(input.elements).forEach((j) => {
-		if (j.type === "checkbox") {
-			j.addEventListener("click", (event)=>{
-				let x = Math.floor([...inputChecks].indexOf(event.target)/3)*5 + checkMap[[...inputChecks].indexOf(event.target)%3];
-				console.log(x);
-				if (inputText[x].disabled === true) {
-					inputText[x].disabled = false;
-				} else {
-					inputText[x].disabled = true;
-				}
-			});
-		}
-		if (j.type === "text") {
-			j.addEventListener("keyup", (event) => {
-				let x = 0;
-				try {
-					x = Math.floor(([...inputText].indexOf(event.target))/5);
-					if (event.key === "Enter") {
-						let y = 1;
-						inputText[x+y].focus();
-						while (inputText[x+y].disabled === true && x+y < inputText.length) {
-							y++;
-							inputText[x+y].focus();
-						}
-						if (x+y >= inputText.length) {input.elements[0].focus();}
-					}
-				}
-				catch {
-					input.elements[4].focus();
-				}
-			});
-		}
-	});
+// tryign to create a class
+function partStruct(checkboxes, textFields) {
+	this.Checks = checkboxes;
+	this.Fields = textFields;
 }
-*/
+
+function createPartStruct(rwPart) {
+	let checkboxes = [];
+	let textFields = [];
+	Array.from(rwPart.children[1].children[0]).forEach(textField => {
+		textFields.push(textField.children[0].children[0].children[0].value);
+	});
+	Array.from(rwPart.children[0].children[0]).forEach(checkbox => {
+		checkboxes.push(checkbox.children[0].children[0].children[0].value);
+	});
+	return new partStruct(checkboxes, textFields);
+}
+
+Array.from(parts).forEach(part => {
+	partStructs.push(createPartStruct(part));
+});
+
+//get data from powerbi embedded table
+//Array.from(document.querySelectorAll("[role=row]")).forEach(j => {console.log(j.children[1].getAttribute("title"));});

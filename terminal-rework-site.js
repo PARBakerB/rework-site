@@ -2,6 +2,7 @@ import * as https from 'node:https';
 //import * as http from 'node:http';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { Buffer } from 'buffer';
 
 import { greatestLogDate } from './modules/fileDate.js';
 import { getModel, compareModels, getMFG, getProdBom } from './modules/partObjects.js';
@@ -53,7 +54,24 @@ const getResponse = async (url) => {
 	}
 };
 const postResponse = async (req, res) => {
-	fs.appendFile(logFileName, req.url.substring(1) + '\n', function (err) {if (err) throw err;});
+	if (req.url === "/PROD-BOM-UPDATE") {
+		fs.writeFileSync(
+			STATIC_PATH + "/prodboms.json",
+			"",//new Uint8Array(Buffer.from(dataReceived)),
+			err => {if (err) throw err;});
+		req.on('data', async dataReceived => {
+			fs.appendFile(
+				STATIC_PATH + "/prodboms.json",
+				dataReceived,//new Uint8Array(Buffer.from(dataReceived)),
+				err => {if (err) throw err;});
+			//console.log(dataReceived.toString('utf8'));
+		});
+		req.on('end', async j => {
+			res.end();
+		});
+	} else {
+		fs.appendFile(logFileName, req.url.substring(1) + '\n', function (err) {if (err) throw err;});
+	}
 	const found = true;
 	const ext = 'html';
 	const streamPath = [STATIC_PATH, '/', 'index.html'];
