@@ -4,6 +4,9 @@ STAR_partech_com.*
 #refData
 **/static/prodboms.json
 
+#tests
+reworkTest/
+
 # Logs
 **/static/logs/*.csv
 *.log

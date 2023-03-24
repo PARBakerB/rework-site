@@ -1,52 +1,58 @@
-import * as fs from 'node:fs';
 //import * as readline from 'node:readline';
+//import axios from 'axios';
+//axios.defaults.withCredentials = true;
+import * as fs from 'node:fs';
+var promFS = fs.promises;
 
-import axios from 'axios';
-axios.defaults.withCredentials = true;
+const MFG_PARTS_FILE = './ref_csv/Manufacturer-part-numbers.csv';
+const PROD_BOMS_FILE = './ref_json/prodboms.json';
 
-// GET ACCESS TOKEN FOR ODATA API CALLS
-async function getAccess() {
-    return ( await axios({
-		method: 'post',
-		url: 'https://login.microsoftonline.com/common/oauth2/authorize?resource=https://partech.operations.dynamics.com/',
-        form: {
-            grant_type: 'client_credentials',
-            client_secret: '',
-            client_id: '',
-            resource: 'https://partech.operations.dynamics.com/'
-        }
-	})).data
+const BAD_BOM_ITEMS = ['754*', '755*', '893*', '713*', '772*', '850*', '262*', 'M6*', 'T8*', 'M9*'];
+
+// REMOVES BOM ITEMS THAT ARE NOT TRACKED IN THE REWORK TOOL
+async function filterBOMArray(bomItems) {
+    let newBomItems = [];
+    bomItems.forEach(j => {
+        let matches = false;
+        BAD_BOM_ITEMS.forEach(k => {
+            // figure out how to check the first few characters not each number
+            if (k[k.length-1] == '*') {
+                if (k.slice(0,k.length-1) == j.itemNum.slice(0,k.length-1)) {matches = true;}
+            }
+            else if (!BAD_BOM_ITEMS.includes(j.itemNum)) {matches = true;}
+        });
+        if (!matches) {newBomItems.push(j);}
+    });
+    return newBomItems;
 }
 
-// RETURNS A LIST OF ITEMS ON BOM OF A PRODUCTION ORDER
-async function getProdBom (prodNumber) {
-    // Use this link to get a top level of queryable data https://partech.operations.dynamics.com/data/
-    // Use this link to get a BOM for PROD-011286 https://partech.operations.dynamics.com/data/ProductionOrderBillOfMaterialLines?$filter=ProductionOrderNumber eq 'PROD-011286'
-    const prodBomGetterLink = (pn) => {
-        return 'https://partech.operations.dynamics.com/data/ProductionOrderBillOfMaterialLines?$filter=ProductionOrderNumber eq \''+ pn + '\'';
-    }
-    var config = {
-      method: 'get',
-
-      url: prodBomGetterLink(prodNumber),
-      // Authorization line will need to be replaced with a variable set by getAccess
-      headers: { 
-        'Authorization': 'Bearer *bearercode*'
-      }
-    };
-    return (await axios(config)).data.value;//.then(function (response) {
+// GET BILL OF MATERIALS LIST FROM PRODUCTION ORDER NUMBER
+async function getBOMFromProd(prodNumber) {
+    let bomItems = [];
+    let fileDat = await fs.promises.readFile(PROD_BOMS_FILE, async function (err, data) {if (err) throw err;});
+	let fileJSON = JSON.parse(fileDat.toString('utf8'));
+	fileJSON.forEach(j => {
+		if (j.ProductionOrderNumber === prodNumber && j.BOMLineQuantity != 0) {
+			bomItems.push({ make: j.SourceBOMId, itemNum: j.ItemNumber, qty: j.BOMLineQuantity });
+		}
+	});
+	return filterBOMArray(bomItems);
 }
 
 // RETURNS A LIST OF MANUFACTURER PART NUMBERS FOR A GIVEN PAR PART
 async function getMFG (parPart) {
-    let pp = parPart.toUpperCase();
-    try {
-        let raw = fs.promises.readFile('./ref_json/mfg_pns.json');
-        let mfgObj = JSON.parse(await raw);
-        let retVal = mfgObj[pp] == undefined ? [] : mfgObj[pp];
-        return retVal;
-    }
-    catch { return []; }
+	let relevant_mfg_part_numbers = [];
+	let raw = await fs.promises.readFile(MFG_PARTS_FILE, async function (err, data) {if (err) throw err;});
+	let mfg_parts_list_split_by_line = raw.toString('utf8').split('\n');
+	mfg_parts_list_split_by_line.forEach(line => {
+		let line_par_part = line.split(';')[2];
+		let line_mfg_part = line.split(';')[1];
+		if (parPart === line_par_part) {
+			relevant_mfg_part_numbers.push(line_mfg_part);
+		}
+	});
+	console.log(relevant_mfg_part_numbers);
+	return relevant_mfg_part_numbers;
 }
 
 // RETURNS A JS OBJECT FROM THE JSON FILE, RETURNS EMPTY OBJECT IF INVALID INPUT
@@ -139,6 +145,9 @@ async function createModel () {
     });
 }
 
+export { getMFG, getModel, compareModels, getBOMFromProd }
+
+
 //createModel();
 // console.log(typeof(await getProdBom('PROD-030324')));
 // fs.writeFile('./prodbom.json',JSON.stringify(await getProdBom('PROD-030324')), (err)=>{
@@ -147,4 +156,36 @@ async function createModel () {
 
 //console.log(await getAccess());
 
-export { getMFG, getModel, compareModels, getProdBom }
+/*
+// GET ACCESS TOKEN FOR ODATA API CALLS -- IT will not approve but leaving it in for reference
+async function getAccess() {
+    return ( await axios({
+		method: 'post',
+		url: 'https://login.microsoftonline.com/common/oauth2/authorize?resource=https://partech.operations.dynamics.com/',
+        form: {
+            grant_type: 'client_credentials',
+            client_secret: '',
+            client_id: '',
+            resource: 'https://partech.operations.dynamics.com/'
+        }
+	})).data
+}
+// RETURNS A LIST OF ITEMS ON BOM OF A PRODUCTION ORDER
+async function getProdBom (prodNumber) {
+    // Use this link to get a top level of queryable data https://partech.operations.dynamics.com/data/
+    // Use this link to get a BOM for PROD-011286 https://partech.operations.dynamics.com/data/ProductionOrderBillOfMaterialLines?$filter=ProductionOrderNumber eq 'PROD-011286'
+    const prodBomGetterLink = (pn) => {
+        return 'https://partech.operations.dynamics.com/data/ProductionOrderBillOfMaterialLines?$filter=ProductionOrderNumber eq \''+ pn + '\'';
+    }
+    var config = {
+      method: 'get',
+
+      url: prodBomGetterLink(prodNumber),
+      // Authorization line will need to be replaced with a variable set by getAccess
+      headers: { 
+        'Authorization': 'Bearer *bearercode*'
+      }
+    };
+    return (await axios(config)).data.value;//.then(function (response) {
+}
+*/

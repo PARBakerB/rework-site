@@ -34,7 +34,7 @@ function updateVariableElements() {
 // ONLY WORKS ON ELEMENTS WITH VISIBILITY CLASS 'hide' OR 'show'
 function toggleVisibility(domObject, value) {
 	if (Array.isArray(domObject)) {
-		domObject.foreach(j => {
+		domObject.forEach(j => {
 			if (j.classList.contains('hide') && value == true) {
 				j.classList.remove('hide');
 				j.classList.add('show');
@@ -106,7 +106,7 @@ async function getMFG(mn) {
 }
 
 // GET PROD BOM
-async function getProdBom(mn) {
+async function getBOMFromProd(mn) {
 	return ( await axios ({
 		method: 'post',
 		url: '420getPROD420',
@@ -236,7 +236,10 @@ Object.values(inputs).forEach((j) => {j.addEventListener("keydown",inputCycle)})
 async function qtyUpdate(event) {
 	if (event.key==="Enter" || event.target == null) {
 		let index = [...qtyInput].indexOf(event.target);
-		if (index <= 7) {qtyInput.elements[index + 1].focus();}
+		if (index <= 7) {
+			qtyInput.elements[index + 1].focus();
+			if (index == 0) { autoSetupByProd(); }
+		}
 		else {input.elements[0].focus();}
 		let isQty = [1, 2].includes(index) || event.target == null;
 		let checkQtys = (qtyInput.elements[1].value !== "" || qtyInput.elements[2].value !== "");
@@ -264,6 +267,51 @@ async function qtyUpdate(event) {
 	}
 }
 Object.values(qtys).forEach((j) => {j.addEventListener("keyup",qtyUpdate)});
+
+// AUTOMATED PROD SETUP USING INFORMATION FROM PRODUCTION ORDER BOMS DATABASE AND MANUFACTURER PART NUMBER DATABASE
+async function autoSetupByProd() {
+	// redesign this so that it only needs to iterate through bom once, storing the bom objects in separate arrays
+	// rather than just updating a qty, then after use the size of the arrays to set the qties
+
+	// find the number of parts coming in and out based on the prod number
+	let bom = await getBOMFromProd(qtyInput.elements[0].value);
+	let partsOutQty = 0;
+	let partsInQty = 0;
+	bom.forEach(bomObject => {if (bomObject.qty > 0) {partsInQty += 1;} 
+		else if (bomObject.qty < 0) {partsOutQty += 1;}
+	});
+	qtyInput.elements[1].value = partsOutQty;
+	qtyInput.elements[2].value = partsInQty;
+	await qtyUpdate(document.createEvent('Event'));
+
+	// store the part input field dom elements in arrays
+	let partsIn = [];
+	let partsOut = [];
+	Object.values(reworkParts).forEach(part => {
+		if (part.innerHTML.includes("Part In")) {
+			partsIn.push(part);
+		}
+		if (part.innerHTML.includes("Part Out")) {
+			partsOut.push(part);
+		}
+	});
+
+	// iterate through the bom again and set the 
+	// BOMOBJECT: { make, itemNum, qty }
+	bom.forEach(async bomObject => {
+		let assignedPartFormInput = bomObject.qty > 0 ? partsIn.pop() : partsOut.pop();
+		assignedPartFormInput
+			.children[1].children[0].children[0].children[0].children[0].children[0]
+			.value = bomObject.itemNum;
+		let mfgPartsList = await getMFG(bomObject.itemNum);
+		mfgPartsList = mfgPartsList;
+		assignedPartFormInput
+			.children[1].children[0].children[2].children[0].children[0].children[0]
+			.value = mfgPartsList[0];
+	});
+	//addDropDown();
+
+}
 
 // AUTOMATED PO SETUP SCRIPT TRIGGERED BY BUTTONS
 async function autoSetup(event) {
