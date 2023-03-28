@@ -130,7 +130,6 @@ const fileServ = async (req, res) => {
 		});
 		req.on('end', async () => {
 			response = await getBOMFromProd(response);
-			console.log(response);
 			res.writeHead(200, { 'Content-Type': 'application/json' });
 			res.write(JSON.stringify(response));
 			res.end();
@@ -163,8 +162,8 @@ const fileServ = async (req, res) => {
 			res.writeHead(200, { 'Content-Type': 'application/json' });
 			let jsonObjectsFile = await fs.promises.readFile(JSON_PATH+"/SavedParts.json");
 			let jsonObjects = JSON.parse(jsonObjectsFile);
-			console.log(JSON.stringify(jsonObjects[response]));
-			res.write(JSON.stringify(jsonObjects[response]));
+			if (JSON.stringify(jsonObjects[response]) != undefined) res.write(JSON.stringify(jsonObjects[response]));
+			else res.write("undefined");
 			res.end();
 		});
 	} else {

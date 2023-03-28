@@ -1,3 +1,5 @@
+import { Part } from './elementObject.js';
+
 // GLOBAL DOM ELEMENTS
 const send = document.getElementById('send');
 const input = document.getElementById('input');
@@ -179,7 +181,6 @@ function refreshChecks(iter) {
 //MISTAKEN SCAN ERROR DETECTION
 function scanErrorDetect(index) {
 	let modelIn = qtyInput[3].value;
-	console.log(modelIn);
 	let misScans = assemblyPartNumbers.concat([modelIn]);
 	let wrongItemScanned = misScans.includes(input.elements[index].value.toUpperCase());
 	if (index === 0 && wrongItemScanned) {
@@ -270,9 +271,6 @@ Object.values(qtys).forEach((j) => {j.addEventListener("keyup",qtyUpdate)});
 
 // AUTOMATED PROD SETUP USING INFORMATION FROM PRODUCTION ORDER BOMS DATABASE AND MANUFACTURER PART NUMBER DATABASE
 async function autoSetupByProd() {
-	// redesign this so that it only needs to iterate through bom once, storing the bom objects in separate arrays
-	// rather than just updating a qty, then after use the size of the arrays to set the qties
-
 	// find the number of parts coming in and out based on the prod number
 	let bom = await getBOMFromProd(qtyInput.elements[0].value);
 	let partsOutQty = 0;
@@ -289,28 +287,25 @@ async function autoSetupByProd() {
 	let partsOut = [];
 	Object.values(reworkParts).forEach(part => {
 		if (part.innerHTML.includes("Part In")) {
-			partsIn.push(part);
+			partsIn.push(new Part(part));
 		}
 		if (part.innerHTML.includes("Part Out")) {
-			partsOut.push(part);
+			partsOut.push(new Part(part));
 		}
 	});
 
-	// iterate through the bom again and set the 
+	// iterate through the bom again and autofill the newly generated part fields 
 	// BOMOBJECT: { make, itemNum, qty }
 	bom.forEach(async bomObject => {
+		// get part fields off the top of either assigned array
 		let assignedPartFormInput = bomObject.qty > 0 ? partsIn.pop() : partsOut.pop();
-		assignedPartFormInput
-			.children[1].children[0].children[0].children[0].children[0].children[0]
-			.value = bomObject.itemNum;
+		let valuesObject = {checks: [0,0,0], fields:[bomObject.itemNum,""]};
+		if ((await assignedPartFormInput.readPart(valuesObject.fields[0])) !== "no previous uses") {return;}
+		// get mfg parts list of item number from bom object
 		let mfgPartsList = await getMFG(bomObject.itemNum);
-		mfgPartsList = mfgPartsList;
-		assignedPartFormInput
-			.children[1].children[0].children[2].children[0].children[0].children[0]
-			.value = mfgPartsList[0];
+		valuesObject.fields[1] = mfgPartsList[0];
+		assignedPartFormInput.writePart(valuesObject);
 	});
-	//addDropDown();
-
 }
 
 // AUTOMATED PO SETUP SCRIPT TRIGGERED BY BUTTONS

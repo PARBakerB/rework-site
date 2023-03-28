@@ -51,7 +51,6 @@ async function getMFG (parPart) {
 			relevant_mfg_part_numbers.push(line_mfg_part);
 		}
 	});
-	console.log(relevant_mfg_part_numbers);
 	return relevant_mfg_part_numbers;
 }
 
