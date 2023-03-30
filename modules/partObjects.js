@@ -4,11 +4,12 @@
 import * as fs from 'node:fs';
 var promFS = fs.promises;
 
-const MFG_PARTS_FILE = './ref_csv/Manufacturer-part-numbers.csv';
-const PROD_BOMS_FILE = './ref_json/prodboms.json';
-const PART_DESCRIPTIONS_FILE = './ref_json/searchNames.json';
+const MFG_PARTS_FILE = './database/Manufacturer-part-numbers.csv';
+const PROD_BOMS_FILE = './database/prodboms.json';
+const PART_DESCRIPTIONS_FILE = './database/searchNames.json';
+const PROD_HEADERS_FILE = './database/prodheaders.json'
 
-const BAD_BOM_ITEMS = ['754*', '755*', '893*', '713*', '772*', '850*', '262*', 'M6*', 'T8*', 'M9*'];
+const BAD_BOM_ITEMS = ['754*', '755*', '893*', '713*', '772*', '850*', '262*'];
 
 // REMOVES BOM ITEMS THAT ARE NOT TRACKED IN THE REWORK TOOL
 async function filterBOMArray(bomItems) {
@@ -30,11 +31,17 @@ async function filterBOMArray(bomItems) {
 // GET BILL OF MATERIALS LIST FROM PRODUCTION ORDER NUMBER
 async function getBOMFromProd(prodNumber) {
     let bomItems = [];
-    let fileDat = await fs.promises.readFile(PROD_BOMS_FILE, async function (err, data) {if (err) throw err;});
-	let fileJSON = JSON.parse(fileDat.toString('utf8'));
-	fileJSON.forEach(j => {
+	let header_file_dat = await fs.promises.readFile(PROD_HEADERS_FILE, async function (err, data) {if (err) throw err;});
+	let header_file_json = JSON.parse(header_file_dat.toString('utf8'));
+	let assemNum = '';
+	header_file_json.forEach(j => {
+		if (j.ProductionOrderNumber === prodNumber) assemNum = j.ItemNumber;
+	});
+	let bom_file_dat = await fs.promises.readFile(PROD_BOMS_FILE, async function (err, data) {if (err) throw err;});
+	let bom_file_json = JSON.parse(bom_file_dat.toString('utf8'));
+	bom_file_json.forEach(j => {
 		if (j.ProductionOrderNumber === prodNumber && j.BOMLineQuantity != 0) {
-			bomItems.push({ make: j.SourceBOMId, itemNum: j.ItemNumber, qty: j.BOMLineQuantity });
+			bomItems.push({ make: assemNum, sourceBOM: j.SourceBOMId, itemNum: j.ItemNumber, qty: j.BOMLineQuantity });
 		}
 	});
 	return filterBOMArray(bomItems);
@@ -57,7 +64,7 @@ async function getMFG (parPart) {
 
 // GET THE SEARCH NAME OF A PAR PART NUMBER/ ITEM NUMBER FROM RELEASEDDISTINCTPRODUCTDETAILSV2
 async function getSearchName (parPart) {
-	let searchName = "Name Not Found";
+	let searchName = "Description Not Found";
 	let raw = await fs.promises.readFile(PART_DESCRIPTIONS_FILE, async function (err, data) {if (err) throw err;});
 	let jsonObject = JSON.parse(raw.toString('utf8'));
 	jsonObject.forEach(j => {

@@ -1,8 +1,8 @@
 #certs
 STAR_partech_com.*
 
-#refData
-**/static/prodboms.json
+#databaseFiles
+database/
 
 #tests
 reworkTest/

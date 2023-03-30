@@ -284,10 +284,28 @@ async function autoSetupByProd() {
 	qtyInput.elements[2].value = partsInQty;
 	await qtyUpdate(document.createEvent('Event'));
 
+	function stringInWCList (str, wildcards) {
+		let matches = false;
+		wildcards.forEach(wc => {
+			if (wc.slice(0,wc.length-1) == str.slice(0,wc.length-1)) {matches = true;}
+		});
+		return matches;
+	}
 
-	bom.forEach(bomObject => {if (bomObject.qty > 0) {partsInQty += 1;} 
-		else if (bomObject.qty < 0) {partsOutQty += 1;}
+	bom.forEach(bomObject => {
+		if (bomObject.qty > 0) {
+			if (stringInWCList(bomObject.itemNum,["M6*","M9*","T8*"])) {
+				qtyInput.elements[3].value = bomObject.itemNum;
+				qtyInput.elements[4].value = bomObject.make;
+				return;
+			}
+			partsInQty += 1;
+		} 
+		else if (bomObject.qty < 0) {
+			partsOutQty += 1;
+		}
 	});
+
 	qtyInput.elements[1].value = partsOutQty;
 	qtyInput.elements[2].value = partsInQty;
 	await qtyUpdate(document.createEvent('Event'));
@@ -305,8 +323,9 @@ async function autoSetupByProd() {
 	});
 
 	// iterate through the bom again and autofill the newly generated part fields 
-	// BOMOBJECT: { make, itemNum, qty }
+	// BOMOBJECT: { make, sourceBOMId, itemNum, qty }
 	bom.forEach(async bomObject => {
+		if (stringInWCList(bomObject.itemNum,["M6*","M9*","T8*"])) {return;}
 		// get part fields off the top of either assigned array
 		let assignedPartFormInput = bomObject.qty > 0 ? partsIn.pop() : partsOut.pop();
 		let valuesObject = {checks: [1,1,1], fields:[bomObject.itemNum,""]};
