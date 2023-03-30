@@ -6,6 +6,7 @@ var promFS = fs.promises;
 
 const MFG_PARTS_FILE = './ref_csv/Manufacturer-part-numbers.csv';
 const PROD_BOMS_FILE = './ref_json/prodboms.json';
+const PART_DESCRIPTIONS_FILE = './ref_json/searchNames.json';
 
 const BAD_BOM_ITEMS = ['754*', '755*', '893*', '713*', '772*', '850*', '262*', 'M6*', 'T8*', 'M9*'];
 
@@ -54,6 +55,17 @@ async function getMFG (parPart) {
 	return relevant_mfg_part_numbers;
 }
 
+// GET THE SEARCH NAME OF A PAR PART NUMBER/ ITEM NUMBER FROM RELEASEDDISTINCTPRODUCTDETAILSV2
+async function getSearchName (parPart) {
+	let searchName = "Name Not Found";
+	let raw = await fs.promises.readFile(PART_DESCRIPTIONS_FILE, async function (err, data) {if (err) throw err;});
+	let jsonObject = JSON.parse(raw.toString('utf8'));
+	jsonObject.forEach(j => {
+		if (j['ItemNumber'] === parPart) searchName = j['SearchName'];
+	});
+	return searchName;
+}
+
 // RETURNS A JS OBJECT FROM THE JSON FILE, RETURNS EMPTY OBJECT IF INVALID INPUT
 async function getModel (modelNumber) {
     let mn = modelNumber.toUpperCase();
@@ -79,17 +91,6 @@ function compareModels (termObj, modelNumber) {
     }
     return retVal;
 }
-/* example termObj
-{
-    model: "M6160-25",
-    serial: "serialNumber",
-    ram: "980027082",
-    storage: "950006107",
-    pedestal: "980027063",
-    cust_dis: '',
-    msr: ''
-}
-*/
 
 // END OF MODULE FUNCTIONS
 /******************************************************************************************/
@@ -144,47 +145,4 @@ async function createModel () {
     });
 }
 
-export { getMFG, getModel, compareModels, getBOMFromProd }
-
-
-//createModel();
-// console.log(typeof(await getProdBom('PROD-030324')));
-// fs.writeFile('./prodbom.json',JSON.stringify(await getProdBom('PROD-030324')), (err)=>{
-//     if (err) throw err;
-// });
-
-//console.log(await getAccess());
-
-/*
-// GET ACCESS TOKEN FOR ODATA API CALLS -- IT will not approve but leaving it in for reference
-async function getAccess() {
-    return ( await axios({
-		method: 'post',
-		url: 'https://login.microsoftonline.com/common/oauth2/authorize?resource=https://partech.operations.dynamics.com/',
-        form: {
-            grant_type: 'client_credentials',
-            client_secret: '',
-            client_id: '',
-            resource: 'https://partech.operations.dynamics.com/'
-        }
-	})).data
-}
-// RETURNS A LIST OF ITEMS ON BOM OF A PRODUCTION ORDER
-async function getProdBom (prodNumber) {
-    // Use this link to get a top level of queryable data https://partech.operations.dynamics.com/data/
-    // Use this link to get a BOM for PROD-011286 https://partech.operations.dynamics.com/data/ProductionOrderBillOfMaterialLines?$filter=ProductionOrderNumber eq 'PROD-011286'
-    const prodBomGetterLink = (pn) => {
-        return 'https://partech.operations.dynamics.com/data/ProductionOrderBillOfMaterialLines?$filter=ProductionOrderNumber eq \''+ pn + '\'';
-    }
-    var config = {
-      method: 'get',
-
-      url: prodBomGetterLink(prodNumber),
-      // Authorization line will need to be replaced with a variable set by getAccess
-      headers: { 
-        'Authorization': 'Bearer *bearercode*'
-      }
-    };
-    return (await axios(config)).data.value;//.then(function (response) {
-}
-*/
+export { getMFG, getModel, compareModels, getBOMFromProd, getSearchName }

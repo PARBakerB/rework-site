@@ -34,14 +34,15 @@ export class Part {
 	writePart = async (savedObj) => {
 		this.checks = savedObj.checks;
 		this.fields = savedObj.fields;
-		
+		await this.updatePartName(savedObj.fields[0]);
+
 		this.webElement.children[0].children[1].children[0].children[0].checked = savedObj.checks[0];
 		this.webElement.children[0].children[2].children[0].children[0].checked = savedObj.checks[1];
 		this.webElement.children[0].children[3].children[0].children[0].checked = savedObj.checks[2];
-
+	
 		this.webElement.children[1].children[0].children[0].children[0].children[0].children[0].value = savedObj.fields[0];
 		await this.addDropDown();
-		this.webElement.children[1].children[0].children[2].children[0].children[0].children[0].value = savedObj.fields[1];
+		this.webElement.children[1].children[0].children[2].children[0].children[0].children[0].value = savedObj.fields[1];	
 	}
 	// add dropdown options to mfg part field
 	addDropDown = async (
@@ -72,6 +73,26 @@ export class Part {
 		return ( await axios ({
 			method: 'post',
 			url: '420getMFG420',
+			data: parPart
+		})).data;
+	}
+	// PUT PART NUMBER DESCRIPTION IN THE HEADER OF THE PART ELEMENT
+	updatePartName = async (parPart = this.fields[0]) => {
+		if (parPart == "") {return;}
+		let searchName = await this.getSearchName(parPart);
+		if (this.webElement.innerHTML.search("Part In") != -1) {
+			this.webElement.innerHTML = "Part In - " + searchName + this.webElement.innerHTML.slice(7);
+		}
+		else if (this.webElement.innerHTML.search("Part Out") != -1) {
+			this.webElement.innerHTML = "Part Out - " + searchName + this.webElement.innerHTML.slice(8);
+		}
+	}
+	// GET PART NUMBER DESCRIPTION
+	getSearchName = async (parPart = this.fields[0]) => {
+		if (parPart === '') {return '';}
+		return ( await axios ({
+			method: 'post',
+			url: '420getSearchName420',
 			data: parPart
 		})).data;
 	}

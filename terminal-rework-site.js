@@ -5,7 +5,7 @@ import * as path from 'node:path';
 import { Buffer } from 'buffer';
 
 import { greatestLogDate } from './modules/fileDate.js';
-import { getModel, compareModels, getMFG, getBOMFromProd } from './modules/partObjects.js';
+import { getModel, compareModels, getMFG, getBOMFromProd, getSearchName } from './modules/partObjects.js';
 
 const PORT = 9615;
 const MIME_TYPES = {
@@ -164,6 +164,17 @@ const fileServ = async (req, res) => {
 			let jsonObjects = JSON.parse(jsonObjectsFile);
 			if (JSON.stringify(jsonObjects[response]) != undefined) res.write(JSON.stringify(jsonObjects[response]));
 			else res.write("undefined");
+			res.end();
+		});
+	} else if (req.url === '/420getSearchName420') {
+		let response = "";
+		req.on('data', async j => {
+			response = j.toString('utf8');
+		});
+		req.on('end', async () => {
+			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+			let searchName = await getSearchName(response);
+			res.write(searchName);
 			res.end();
 		});
 	} else {

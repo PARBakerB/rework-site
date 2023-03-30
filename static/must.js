@@ -7,7 +7,6 @@ const qtyInput = document.getElementById('qty');
 const logReq = document.getElementById('log-request');
 const qtys = document.getElementsByClassName('qtys');
 const logReqs = document.getElementsByClassName('log-requests');
-const buttons = document.getElementsByClassName("auto-setup-buttons");
 const notesInput = document.getElementById("notes").children[0].children[1];
 const logOut = document.getElementById("log-output");
 const errMsg = document.getElementById("errorMsg");
@@ -219,6 +218,11 @@ function inputCycle(event) {
 				input.elements[index].focus();
 			} catch {
 				if (input.elements[0].value !== "") {
+					let usedPartsArray = [];
+					Object.values(reworkParts).forEach(part => {
+						usedPartsArray.push(new Part(part));
+					});
+					usedPartsArray.forEach(part => { part.savePart(); });
 					postInputs();
 					errMsg.innerText = "";
 				} else {
@@ -275,6 +279,12 @@ async function autoSetupByProd() {
 	let bom = await getBOMFromProd(qtyInput.elements[0].value);
 	let partsOutQty = 0;
 	let partsInQty = 0;
+
+	qtyInput.elements[1].value = partsOutQty;
+	qtyInput.elements[2].value = partsInQty;
+	await qtyUpdate(document.createEvent('Event'));
+
+
 	bom.forEach(bomObject => {if (bomObject.qty > 0) {partsInQty += 1;} 
 		else if (bomObject.qty < 0) {partsOutQty += 1;}
 	});
@@ -299,7 +309,7 @@ async function autoSetupByProd() {
 	bom.forEach(async bomObject => {
 		// get part fields off the top of either assigned array
 		let assignedPartFormInput = bomObject.qty > 0 ? partsIn.pop() : partsOut.pop();
-		let valuesObject = {checks: [0,0,0], fields:[bomObject.itemNum,""]};
+		let valuesObject = {checks: [1,1,1], fields:[bomObject.itemNum,""]};
 		if ((await assignedPartFormInput.readPart(valuesObject.fields[0])) !== "no previous uses") {return;}
 		// get mfg parts list of item number from bom object
 		let mfgPartsList = await getMFG(bomObject.itemNum);
@@ -307,104 +317,6 @@ async function autoSetupByProd() {
 		assignedPartFormInput.writePart(valuesObject);
 	});
 }
-
-// AUTOMATED PO SETUP SCRIPT TRIGGERED BY BUTTONS
-async function autoSetup(event) {
-	switch(event.target.innerText) {
-		case "M9100-10 to M9100-11":
-			qtyInput.elements[1].value = M910010to11[0];
-			qtyInput.elements[2].value = M910010to11[1];
-			qtyInput.elements[3].value = M910010to11[2];
-			qtyInput.elements[4].value = M910010to11[3];
-			await qtyUpdate(document.createEvent('Event'));
-			input.elements[1].checked = M910010to11[4][0];
-			input.elements[2].checked = M910010to11[4][1];
-			input.elements[3].checked = M910010to11[4][2];
-			input.elements[4].value = M910010to11[5];
-			input.elements[9].checked = M910010to11[7][0];
-			input.elements[10].checked = M910010to11[7][1];
-			input.elements[11].checked = M910010to11[7][2];
-			input.elements[12].value = M910010to11[8];
-			input.elements[6].value = M910010to11[6];
-			input.elements[14].value = M910010to11[9];
-			addDropDown();
-			break;
-		case "M9100-11 to M9100-10":
-			qtyInput.elements[1].value = M910010to11[0];
-			qtyInput.elements[2].value = M910010to11[1];
-			qtyInput.elements[3].value = M910010to11[3];
-			qtyInput.elements[4].value = M910010to11[2];
-			await qtyUpdate(document.createEvent('Event'));
-			input.elements[1].checked = M910010to11[7][0];
-			input.elements[2].checked = M910010to11[7][1];
-			input.elements[3].checked = M910010to11[7][2];
-			input.elements[4].value = M910010to11[8];
-			input.elements[9].checked = M910010to11[4][0];
-			input.elements[10].checked = M910010to11[4][1];
-			input.elements[11].checked = M910010to11[4][2];
-			input.elements[12].value = M910010to11[5];
-			input.elements[6].value = M910010to11[9];
-			input.elements[14].value = M910010to11[6];
-			addDropDown();
-			break;
-		case "M9110-11 to M9110-21":
-			qtyInput.elements[1].value = M911011to21[0];
-			qtyInput.elements[2].value = M911011to21[1];
-			qtyInput.elements[3].value = M911011to21[2];
-			qtyInput.elements[4].value = M911011to21[3];
-			await qtyUpdate(document.createEvent('Event'));
-			input.elements[1].checked = M911011to21[4][0];
-			input.elements[2].checked = M911011to21[4][1];
-			input.elements[3].checked = M911011to21[4][2];
-			input.elements[4].value = M911011to21[5];
-			input.elements[9].checked = M911011to21[7][0];
-			input.elements[10].checked = M911011to21[7][1];
-			input.elements[11].checked = M911011to21[7][2];
-			input.elements[12].value = M911011to21[8];
-			input.elements[17].checked = M911011to21[10][0];
-			input.elements[18].checked = M911011to21[10][1];
-			input.elements[19].checked = M911011to21[10][2];
-			input.elements[20].value = M911011to21[11];
-			input.elements[6].value = M911011to21[6];
-			input.elements[14].value = M911011to21[9];
-			input.elements[22].value = M911011to21[12];
-			addDropDown();
-			break;
-		case "M9110-21 to M9110-11":
-			qtyInput.elements[1].value = M911011to21[1];
-			qtyInput.elements[2].value = M911011to21[0];
-			qtyInput.elements[3].value = M911011to21[3];
-			qtyInput.elements[4].value = M911011to21[2];
-			await qtyUpdate(document.createEvent('Event'));
-			input.elements[1].checked = M911011to21[10][0];
-			input.elements[2].checked = M911011to21[10][1];
-			input.elements[3].checked = M911011to21[10][2];
-			input.elements[4].value = M911011to21[11];
-			input.elements[9].checked = M911011to21[7][0];
-			input.elements[10].checked = M911011to21[7][1];
-			input.elements[11].checked = M911011to21[7][2];
-			input.elements[12].value = M911011to21[8];
-			input.elements[17].checked = M911011to21[4][0];
-			input.elements[18].checked = M911011to21[4][1];
-			input.elements[19].checked = M911011to21[4][2];
-			input.elements[20].value = M911011to21[5];
-			input.elements[6].value = M911011to21[12];
-			input.elements[14].value = M911011to21[9];
-			input.elements[22].value = M911011to21[6];
-			addDropDown();
-			break;
-		case "Custom":
-			//disabledArray.forEach((j) => {j.disabled = false;});
-			//disabledArray = [];
-			qtyInput.elements[1].value = "";
-			qtyInput.elements[2].value = "";
-			qtyInput.elements[3].value = "";
-			qtyInput.elements[4].value = "";
-			await qtyUpdate(document.createEvent('Event'));
-			break;
-	}
-}
-Object.values(buttons).forEach((j) => {j.addEventListener("click",autoSetup)});
 
 // MOVES FOCUS TO BEGINNING OF FORM ON ENTER PRESS IN NOTES FIELD
 notesInput.addEventListener('keyup', (event)=>{
@@ -438,61 +350,3 @@ async function viewLog(event) {
 	}
 }
 Object.values(logReqs).forEach((j)=>{j.addEventListener("keyup",viewLog);});
-
-// HELPER FUNCTION FOR addDropDown(), TAKES AN ARRAY OF VALUES AND FORMATS AS A DATALIST
-function dataListConst(optArr) {
-	let retVal = '\n';
-	optArr.forEach(j => {
-		retVal += "<option value=\""+j+"\">\n";
-	});
-	return retVal;
-}
-
-// ADDING DROPDOWN MENUS FOR IN/OUTS WITH MULTIPLE AML LISTINGS
-async function addDropDown() {
-	let dropdownValueMaintainer = await Promise.all(Object.values(reworkParts).map(async j => {
-		let dropdownInput = j.children[1].children[0].children[2].children[0].children[0].children[0];
-		let dropdownValue = dropdownInput.value;
-		let liDiv = j.children[1].children[0].children[2].children[0];
-		let parPart = j.children[1].children[0].children[0].children[0].children[0].children[0].value;
-		let mfgPart = await getMFG(parPart);
-		if (mfgPart.length !== 0) {
-			let attributeName = Math.floor(Math.random()*50000000) + '';
-			dropdownInput.setAttribute('list', attributeName);
-			let listFormat = "<datalist id=\""+attributeName+"\"></datalist>";
-			liDiv.innerHTML += listFormat;
-			let optionsList = dataListConst(mfgPart);
-			document.getElementById(attributeName).innerHTML = optionsList;
-		}
-		return dropdownValue;
-	}));
-	let iter = 0;
-	Object.values(reworkParts).forEach(j => {
-		let dropdownInput = j.children[1].children[0].children[2].children[0].children[0].children[0];
-		dropdownInput.value = dropdownValueMaintainer[iter];
-		iter++;
-	});
-}
-
-// getProdBom demontsrated use
-// (await getProdBom('PROD-011286')).forEach((j)=>{
-// 	console.log(j['ItemNumber']);
-// 	console.log(j['BOMLineQuantity']);
-// });
-
-// HOWREWORK DEMONSTRATED USE
-// let resdata = await howRework(
-// 	{
-// 		model: "M6150",
-// 		ram: "980027040",
-// 		storage: "980027028",
-// 		pedestal: "980027063",
-// 		cust_dis: "",
-// 		msr: ""
-// 	},
-// 	"M6150-02"
-// );
-// console.log(resdata.ram[0]);
-
-
-//console.log(await getMFG("980029757"));
