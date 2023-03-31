@@ -1,0 +1,3 @@
+This folder holds the reference databases for the tool.
+
+Power automate sends database updates to the tool and it stores them here.
