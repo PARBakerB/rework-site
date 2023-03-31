@@ -2,7 +2,8 @@
 STAR_partech_com.*
 
 #databaseFiles
-database/
+database/*.json
+database/*.csv
 
 #tests
 reworkTest/
