@@ -15,11 +15,12 @@ export function greatestLogDate() {
     const fileNames = fs.readdirSync("./static/logs");
     var x = Array();
     fileNames.forEach(function (file) {
+        if (file.includes("loginfo")) return;
         for (let i=0; i<12; i++) {
             if (file.slice(4,7) === months[i]) {
                 x.push(((i+1)*100) + parseInt(file.slice(8,10)) + parseInt(file.slice(11,15)*10000));
             }
         }
     });
-    return fileNames[x.indexOf(Math.max(...x))];
+    return fileNames[x.indexOf(Math.max(...x)) +1];
 }

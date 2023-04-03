@@ -6,6 +6,7 @@ import { Buffer } from 'buffer';
 
 import { greatestLogDate } from './modules/fileDate.js';
 import { getModel, compareModels, getMFG, getBOMFromProd, getSearchName } from './modules/partObjects.js';
+import { createPdf } from './modules/pdf.js';
 
 const PORT = 9615;
 const MIME_TYPES = {
@@ -21,11 +22,11 @@ const MIME_TYPES = {
   gif: 'image/gif',
   ico: 'image/x-icon',
   svg: 'image/svg+xml',
-  mp3: 'audio/mp3'
+  mp3: 'audio/mp3',
+  pdf: 'application/pdf'
 };
 const STATIC_PATH = path.join(process.cwd(), './static');
-const JSON_PATH = path.join(process.cwd(), './ref_json');
-const CSV_PATH = path.join(process.cwd(), './ref_csv');
+const DATABASE_PATH = path.join(process.cwd(), './database');
 
 const logFileName = STATIC_PATH + '/logs/' + Date().slice(0,-39).replace(/ /g, "_") + '.csv';
 const options = {
@@ -68,12 +69,12 @@ const postResponse = async (req, res) => {
 			// this if checks if this is the first post in a series
 			if (JSON.parse(dataReceived)[0].ProductionOrderNumber == "PROD-000001") {
 				fs.writeFileSync(
-					JSON_PATH + "/prodboms.json",
+					DATABASE_PATH + "/prodboms.json",
 					"",
 					err => {if (err) throw err;});
 			}
 			fs.appendFile(
-				JSON_PATH + "/prodboms.json",
+				DATABASE_PATH + "/prodboms.json",
 				dataReceived,
 				err => {if (err) throw err;});
 		});
@@ -141,11 +142,11 @@ const fileServ = async (req, res) => {
 		});
 		req.on('end', async () => {
 			response = JSON.parse(response);
-			let jsonObjectsFile = await fs.promises.readFile(JSON_PATH+"/SavedParts.json");
+			let jsonObjectsFile = await fs.promises.readFile(DATABASE_PATH+"/SavedParts.json");
 			let jsonObjects = JSON.parse(jsonObjectsFile);
 			jsonObjects[response.fields[0]] = response;
 			fs.writeFileSync(
-				JSON_PATH+"/SavedParts.json",
+				DATABASE_PATH+"/SavedParts.json",
 				JSON.stringify(jsonObjects),
 				err => {if (err) throw err;}
 			);
@@ -160,7 +161,7 @@ const fileServ = async (req, res) => {
 		});
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': 'application/json' });
-			let jsonObjectsFile = await fs.promises.readFile(JSON_PATH+"/SavedParts.json");
+			let jsonObjectsFile = await fs.promises.readFile(DATABASE_PATH+"/SavedParts.json");
 			let jsonObjects = JSON.parse(jsonObjectsFile);
 			if (JSON.stringify(jsonObjects[response]) != undefined) res.write(JSON.stringify(jsonObjects[response]));
 			else res.write("undefined");
@@ -175,6 +176,17 @@ const fileServ = async (req, res) => {
 			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
 			let searchName = await getSearchName(response);
 			res.write(searchName);
+			res.end();
+		});
+	} else if (req.url === '/420getPDF420') {
+		let response = "";
+		req.on('data', async j => {
+			response = j.toString('utf8');
+		});
+		req.on('end', async () => {
+			res.writeHead(200, { 'Content-Type': MIME_TYPES['pdf'] });
+			let pdfData = await createPdf(response);
+			res.write(pdfData);
 			res.end();
 		});
 	} else {

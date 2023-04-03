@@ -196,7 +196,6 @@ function inputCycle(event) {
 	let ii = index-1 > -1 ? index-1 : 0;
 	let checks = [];
 	if (event.key==="Enter") {
-		addDropDown();
 		if (!scanErrorDetect(index)) {
 			document.getElementById("errorLightUpWindow").classList.remove("error-container");
 			if (ii%8 < 3) {
@@ -369,3 +368,48 @@ async function viewLog(event) {
 	}
 }
 Object.values(logReqs).forEach((j)=>{j.addEventListener("keyup",viewLog);});
+
+document.getElementById('printLog').addEventListener('click', async (event) => {
+
+	function closePrint() {
+		document.body.removeChild(this.__container__);
+	}
+
+	function setPrint() {
+		this.contentWindow.__container__ = this;
+		this.contentWindow.onbeforeunload = closePrint;
+		this.contentWindow.onafterprint = closePrint;
+		this.contentWindow.focus(); // Required for IE
+		this.contentWindow.print();
+	}
+
+	function printPage(sURL) {
+		const hideFrame = document.createElement("iframe");
+		hideFrame.onload = setPrint;
+		hideFrame.style.position = "fixed";
+		hideFrame.style.right = "0";
+		hideFrame.style.bottom = "0";
+		hideFrame.style.width = "0";
+		hideFrame.style.height = "0";
+		hideFrame.style.border = "0";
+		hideFrame.src = sURL;
+		document.body.appendChild(hideFrame);
+	}
+
+	const logReqSize = logReqs[1].value;
+	const log = await getLogRequest();
+
+	let logArray = log.data.split("\n");
+	let x = 0;
+	logArray.reverse().forEach(async j => {
+		if (j !== "" && x < logReqSize && parseInt((j.slice(0, j.indexOf(","))).replace(/\D/g,'')) === parseInt(logReqs[0].value.replace(/\D/g,''))) {
+			let sURL = j.split(",")[4];
+			let pdfStream = await axios({ method: 'post', url: '420getPDF420', data: sURL });
+			console.log(j);
+			printPage(pdfStream);
+			x++;
+		}
+	});
+
+});
+document.getElementById('printLog').classList.add('hide');
