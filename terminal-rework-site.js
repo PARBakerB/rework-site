@@ -178,10 +178,10 @@ const fileServ = async (req, res) => {
 			res.write(searchName);
 			res.end();
 		});
-	} else if (req.url === '/420getPDF420') {
+	} else if (req.url === '/420getPDFPages420') {
 		let response = "";
 		req.on('data', async j => {
-			response = j.toString('utf8');
+			response = JSON.parse(j.toString('utf8'));
 		});
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': MIME_TYPES['pdf'] });

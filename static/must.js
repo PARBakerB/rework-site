@@ -358,7 +358,10 @@ async function viewLog(event) {
 			let logArray = log.data.split("\n");
 			let x = 0;
 			logArray.reverse().forEach(j => {
-				if (j !== "" && x < logReqSize && parseInt((j.slice(0, j.indexOf(","))).replace(/\D/g,'')) === parseInt(logReqs[0].value.replace(/\D/g,''))) {
+				let iterableIsNotBlank = j !== "";
+				let notExceedRequestedNumberOfLogs = x <= logReqSize;
+				let numberInProdStringMatchesRequest = parseInt((j.slice(0, j.indexOf(","))).replace(/\D/g,'')) === parseInt(logReqs[0].value.replace(/\D/g,''));
+				if (iterableIsNotBlank && notExceedRequestedNumberOfLogs && numberInProdStringMatchesRequest) {
 					logdiv.innerHTML += ("<li>" + j.split(",")[4] + "</li>");
 					x++;
 				}
@@ -371,45 +374,33 @@ Object.values(logReqs).forEach((j)=>{j.addEventListener("keyup",viewLog);});
 
 document.getElementById('printLog').addEventListener('click', async (event) => {
 
-	function closePrint() {
-		document.body.removeChild(this.__container__);
+	let pdfData = async () => {
+		const requestedSerials = [];
+		const logReqSize = logReqs[1].value;
+		const log = await getLogRequest();
+		let logArray = log.data.split("\n");
+		let x = 0;
+		logArray.reverse().forEach(j => {
+			let iterableIsNotBlank = j !== "";
+			let notExceedRequestedNumberOfLogs = x < logReqSize;
+			let numberInProdStringMatchesRequest = parseInt((j.slice(0, j.indexOf(","))).replace(/\D/g,'')) === parseInt(logReqs[0].value.replace(/\D/g,''));
+			if (iterableIsNotBlank && notExceedRequestedNumberOfLogs && numberInProdStringMatchesRequest) {
+				requestedSerials.push(j.split(',')[4]);
+				x++;
+			}
+		});
+
+		let postData = {label: '1801', model: qtyInput.elements[4].value, serials: requestedSerials};
+		console.log(postData);
+		document.getElementById("printFrame").src = (await axios({
+			method: 'post',
+			url: '420getPDFPages420',
+			data: JSON.stringify(postData)
+		})).data;
 	}
 
-	function setPrint() {
-		this.contentWindow.__container__ = this;
-		this.contentWindow.onbeforeunload = closePrint;
-		this.contentWindow.onafterprint = closePrint;
-		this.contentWindow.focus(); // Required for IE
-		this.contentWindow.print();
-	}
-
-	function printPage(sURL) {
-		const hideFrame = document.createElement("iframe");
-		hideFrame.onload = setPrint;
-		hideFrame.style.position = "fixed";
-		hideFrame.style.right = "0";
-		hideFrame.style.bottom = "0";
-		hideFrame.style.width = "0";
-		hideFrame.style.height = "0";
-		hideFrame.style.border = "0";
-		hideFrame.src = sURL;
-		document.body.appendChild(hideFrame);
-	}
-
-	const logReqSize = logReqs[1].value;
-	const log = await getLogRequest();
-
-	let logArray = log.data.split("\n");
-	let x = 0;
-	logArray.reverse().forEach(async j => {
-		if (j !== "" && x < logReqSize && parseInt((j.slice(0, j.indexOf(","))).replace(/\D/g,'')) === parseInt(logReqs[0].value.replace(/\D/g,''))) {
-			let sURL = j.split(",")[4];
-			let pdfStream = await axios({ method: 'post', url: '420getPDF420', data: sURL });
-			console.log(j);
-			printPage(pdfStream);
-			x++;
-		}
-	});
+	toggleVisibility(document.getElementById("pdf-Iframe"), 1);
+	pdfData();
 
 });
-document.getElementById('printLog').classList.add('hide');
+//document.getElementById('printLog').classList.add('hide');
