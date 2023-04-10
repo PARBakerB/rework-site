@@ -375,7 +375,8 @@ Object.values(logReqs).forEach((j)=>{j.addEventListener("keyup",viewLog);});
 document.getElementById('printLog').addEventListener('click', async (event) => {
 
 	let pdfData = async () => {
-		const requestedSerials = [];
+		let requestedSerials = [];
+		let reworkModel = "";
 		const logReqSize = logReqs[1].value;
 		const log = await getLogRequest();
 		let logArray = log.data.split("\n");
@@ -385,22 +386,21 @@ document.getElementById('printLog').addEventListener('click', async (event) => {
 			let notExceedRequestedNumberOfLogs = x < logReqSize;
 			let numberInProdStringMatchesRequest = parseInt((j.slice(0, j.indexOf(","))).replace(/\D/g,'')) === parseInt(logReqs[0].value.replace(/\D/g,''));
 			if (iterableIsNotBlank && notExceedRequestedNumberOfLogs && numberInProdStringMatchesRequest) {
+				reworkModel = j.split(',')[3];
 				requestedSerials.push(j.split(',')[4]);
 				x++;
 			}
 		});
+		if (requestedSerials == []) return -1;
+		let postData = {label: '1801', model: reworkModel, serials: requestedSerials};
 
-		let postData = {label: '1801', model: qtyInput.elements[4].value, serials: requestedSerials};
-		console.log(postData);
 		document.getElementById("printFrame").src = (await axios({
 			method: 'post',
 			url: '420getPDFPages420',
 			data: JSON.stringify(postData)
 		})).data;
 	}
-
-	toggleVisibility(document.getElementById("pdf-Iframe"), 1);
-	pdfData();
+	if (pdfData() != -1) toggleVisibility(document.getElementById("pdf-Iframe"), 1);
 
 });
 //document.getElementById('printLog').classList.add('hide');

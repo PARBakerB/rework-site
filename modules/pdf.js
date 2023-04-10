@@ -1,5 +1,6 @@
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import * as fs from 'node:fs';
 
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { canvasStream } from './canvas.js';
 
 // inches to pixels conversion: vertical - 41.66, horizontal - 50
@@ -14,39 +15,63 @@ const pdfLibSizeRef = {
 async function createPdf(data) {
 	const pdfDoc = await PDFDocument.create();
 	const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-	const fontSize = 10;
+	const fontSize = 7;
+	const tm_stream = await pdfDoc.embedJpg(fs.readFileSync('./database/PAR_PHASE_TM.jpg'));
+	/*
+	NEED TO CREATE A SYSTEM FOR ONLY EMBEDDING THE IMAGES USED IN THE PDFS ONCE,
+	INSTEAD OF EMBEDDING THEM ONCE PER PAGE
+	...
+	POSSIBLY ITERATE THROUGH THE DATA BEFOREHAND AND LOOK FOR UNIQUE ENTRIES,
+	THEN FIND A WAY TO REFERENCE THOSE UNIQUE EMBEDS DURING THE DRAWING PORTION
+	*/
 	data.serials.map(async serial => {
 		// generic page setup
 		const page = pdfDoc.addPage(pdfLibSizeRef[data.label]);
 		const {width, height} = page.getSize();
+		let scaleFactor = (((2/5)* width) / tm_stream.width);
+		page.drawImage(tm_stream, {
+			x: 3,
+			y: 33,
+			width: tm_stream.width * scaleFactor,
+			height: tm_stream.height * scaleFactor
+		});
 		// components drawn per model/serial
-		page.drawText(data.model, {
-			x: width / 2 - 20,
-			y: height - 1 * fontSize,
+		page.drawText("Model #:        " + data.model, {
+			x: 3,
+			y: height - 1.9 * fontSize - 0.5,
 			size: fontSize,
 			font: timesRomanFont,
 			color: rgb(0, 0, 0)
 		});
 		const modelBarcode = await pdfDoc.embedPng(canvasStream(data.model, 1));
+		scaleFactor =  (1/2) * (width/modelBarcode.width);
 		page.drawImage(modelBarcode, {
-			x: width / 2 - modelBarcode.width / 3,
-			y: (7/8)*height - modelBarcode.height,
-			width: modelBarcode.width/1.5,
-			height: modelBarcode.height
+			x: (width / 2) - ((modelBarcode.width * scaleFactor) / 2) + 7,
+			y: 9,
+			width: modelBarcode.width * scaleFactor,
+			height: modelBarcode.height * (8/10)
 		});
-		page.drawText(serial, {
-			x: width / 2 - 20,
-			y: height - 3 * fontSize,
+		page.drawText("Serial #:  " + serial, {
+			x: 3,
+			y: 11,
 			size: fontSize,
 			font: timesRomanFont,
 			color: rgb(0, 0, 0)
 		});
 		const serialBarcode = await pdfDoc.embedPng(canvasStream(serial, 1));
+		scaleFactor = (1/2) * (width/serialBarcode.width);
 		page.drawImage(serialBarcode, {
-			x: width / 2 - serialBarcode.width/3,
-			y: (4/8)*height - serialBarcode.height,
-			width: serialBarcode.width/1.5,
-			height: serialBarcode.height
+			x: (width / 2) - ((serialBarcode.width * scaleFactor) / 2) - 7,
+			y: -8,//(1/8)*height,// - serialBarcode.height,
+			width: serialBarcode.width * scaleFactor * 1.7,
+			height: serialBarcode.height * (8/10)
+		});
+		page.drawText("REV.: 1.0", {
+			x: 3.5,
+			y: 2,
+			size: fontSize-3,
+			font: timesRomanFont,
+			color: rgb(0, 0, 0)
 		});
 	});
 	const pdfBytes = await pdfDoc.saveAsBase64({ dataUri: true });
