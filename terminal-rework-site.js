@@ -186,7 +186,9 @@ const fileServ = async (req, res) => {
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': MIME_TYPES['pdf'] });
 			let pdfData = await createPdf(response);
-			res.write(pdfData);
+			//res.write(pdfData);
+			await fs.promises.writeFile('./static/print.pdf', pdfData);
+			res.write("print.pdf")
 			res.end();
 		});
 	} else {

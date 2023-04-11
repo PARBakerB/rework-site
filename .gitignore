@@ -12,6 +12,9 @@ reworkTest/
 obsolete/
 ref_json/
 
+#print files
+**/static/print.pdf
+
 # Logs
 **/static/logs/*.csv
 *.log

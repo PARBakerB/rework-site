@@ -372,9 +372,16 @@ async function viewLog(event) {
 }
 Object.values(logReqs).forEach((j)=>{j.addEventListener("keyup",viewLog);});
 
-document.getElementById('printLog').addEventListener('click', async (event) => {
+Object.values(document.getElementById("printButtons").children).forEach(printButton => 
+	printButton.addEventListener('click', async () =>
+	{
+	let iFrameContainer = document.getElementById('pdf-Iframe');
+	if (iFrameContainer.children.length != 0) iFrameContainer.innerHTML = "";
 
 	const printFrame = document.createElement("iframe");
+	printFrame.onload = () => {
+		printFrame.contentWindow.print();
+	}
 	printFrame.setAttribute('id', 'printFrame');
 
 	let requestedSerials = [];
@@ -394,7 +401,8 @@ document.getElementById('printLog').addEventListener('click', async (event) => {
 		}
 	});
 	if (requestedSerials == []) return -1;
-	let postData = {label: '1801', model: reworkModel, serials: requestedSerials};
+	
+	let postData = {label: printButton.value.split(" ")[0], model: reworkModel, serials: requestedSerials};
 
 	printFrame.src = (await axios({
 		method: 'post',
@@ -402,7 +410,5 @@ document.getElementById('printLog').addEventListener('click', async (event) => {
 		data: JSON.stringify(postData)
 	})).data;
 
-	document.getElementById('pdf-Iframe').appendChild(printFrame);
-
-});
-//document.getElementById('printLog').classList.add('hide');
+	iFrameContainer.appendChild(printFrame);
+}));
