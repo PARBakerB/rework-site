@@ -17,15 +17,10 @@ async function createPdf(data) {
 	const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
 	const fontSize = 7;
 	const tm_stream = await pdfDoc.embedJpg(fs.readFileSync('./database/PAR_PHASE_TM.jpg'));
-	/*
-	NEED TO CREATE A SYSTEM FOR ONLY EMBEDDING THE IMAGES USED IN THE PDFS ONCE,
-	INSTEAD OF EMBEDDING THEM ONCE PER PAGE
-	...
-	POSSIBLY ITERATE THROUGH THE DATA BEFOREHAND AND LOOK FOR UNIQUE ENTRIES,
-	THEN FIND A WAY TO REFERENCE THOSE UNIQUE EMBEDS DURING THE DRAWING PORTION
-	*/
+	const modelBarcode = await pdfDoc.embedPng(canvasStream(data.model, 1));
+
 	data.serials.map(async serial => {
-		// generic page setup
+		// generic page setup, model / logo
 		const page = pdfDoc.addPage(pdfLibSizeRef[data.label]);
 		const {width, height} = page.getSize();
 		let scaleFactor = (((2/5)* width) / tm_stream.width);
@@ -35,7 +30,6 @@ async function createPdf(data) {
 			width: tm_stream.width * scaleFactor,
 			height: tm_stream.height * scaleFactor
 		});
-		// components drawn per model/serial
 		page.drawText("Model #:        " + data.model, {
 			x: 3,
 			y: height - 1.9 * fontSize - 0.5,
@@ -43,7 +37,6 @@ async function createPdf(data) {
 			font: timesRomanFont,
 			color: rgb(0, 0, 0)
 		});
-		const modelBarcode = await pdfDoc.embedPng(canvasStream(data.model, 1));
 		scaleFactor =  (1/2) * (width/modelBarcode.width);
 		page.drawImage(modelBarcode, {
 			x: (width / 2) - ((modelBarcode.width * scaleFactor) / 2) + 7,
@@ -51,6 +44,7 @@ async function createPdf(data) {
 			width: modelBarcode.width * scaleFactor,
 			height: modelBarcode.height * (8/10)
 		});
+		// components drawn per serial
 		page.drawText("Serial #:  " + serial, {
 			x: 3,
 			y: 11,

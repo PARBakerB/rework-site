@@ -374,33 +374,35 @@ Object.values(logReqs).forEach((j)=>{j.addEventListener("keyup",viewLog);});
 
 document.getElementById('printLog').addEventListener('click', async (event) => {
 
-	let pdfData = async () => {
-		let requestedSerials = [];
-		let reworkModel = "";
-		const logReqSize = logReqs[1].value;
-		const log = await getLogRequest();
-		let logArray = log.data.split("\n");
-		let x = 0;
-		logArray.reverse().forEach(j => {
-			let iterableIsNotBlank = j !== "";
-			let notExceedRequestedNumberOfLogs = x < logReqSize;
-			let numberInProdStringMatchesRequest = parseInt((j.slice(0, j.indexOf(","))).replace(/\D/g,'')) === parseInt(logReqs[0].value.replace(/\D/g,''));
-			if (iterableIsNotBlank && notExceedRequestedNumberOfLogs && numberInProdStringMatchesRequest) {
-				reworkModel = j.split(',')[3];
-				requestedSerials.push(j.split(',')[4]);
-				x++;
-			}
-		});
-		if (requestedSerials == []) return -1;
-		let postData = {label: '1801', model: reworkModel, serials: requestedSerials};
+	const printFrame = document.createElement("iframe");
+	printFrame.setAttribute('id', 'printFrame');
 
-		document.getElementById("printFrame").src = (await axios({
-			method: 'post',
-			url: '420getPDFPages420',
-			data: JSON.stringify(postData)
-		})).data;
-	}
-	if (pdfData() != -1) toggleVisibility(document.getElementById("pdf-Iframe"), 1);
+	let requestedSerials = [];
+	let reworkModel = "";
+	const logReqSize = logReqs[1].value;
+	const log = await getLogRequest();
+	let logArray = log.data.split("\n");
+	let x = 0;
+	logArray.reverse().forEach(j => {
+		let iterableIsNotBlank = j !== "";
+		let notExceedRequestedNumberOfLogs = x < logReqSize;
+		let numberInProdStringMatchesRequest = parseInt((j.slice(0, j.indexOf(","))).replace(/\D/g,'')) === parseInt(logReqs[0].value.replace(/\D/g,''));
+		if (iterableIsNotBlank && notExceedRequestedNumberOfLogs && numberInProdStringMatchesRequest) {
+			reworkModel = j.split(',')[3];
+			requestedSerials.push(j.split(',')[4]);
+			x++;
+		}
+	});
+	if (requestedSerials == []) return -1;
+	let postData = {label: '1801', model: reworkModel, serials: requestedSerials};
+
+	printFrame.src = (await axios({
+		method: 'post',
+		url: '420getPDFPages420',
+		data: JSON.stringify(postData)
+	})).data;
+
+	document.getElementById('pdf-Iframe').appendChild(printFrame);
 
 });
 //document.getElementById('printLog').classList.add('hide');
