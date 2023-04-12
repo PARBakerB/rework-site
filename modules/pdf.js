@@ -22,10 +22,10 @@ async function createPdf(data) {
 	data.serials.map(async serial => {
 		const page = pdfDoc.addPage(pdfLibSizeRef[data.label]);
 		const {width, height} = page.getSize();
-		const serialBarcode = await pdfDoc.embedPng(canvasStream(serial, 1));
 		let scaleFactor = 1;
 		switch (data.label) {
 			case '1801':
+				// draw logo
 				scaleFactor = (((2/5)* width) / tm_stream.width);
 				page.drawImage(tm_stream, {
 					x: 3,
@@ -33,6 +33,7 @@ async function createPdf(data) {
 					width: tm_stream.width * scaleFactor,
 					height: tm_stream.height * scaleFactor
 				});
+				//draw model text and barcode
 				page.drawText("Model #:        " + data.model, {
 					x: 3,
 					y: height - 1.9 * fontSize - 0.5,
@@ -47,6 +48,7 @@ async function createPdf(data) {
 					width: modelBarcode.width * scaleFactor,
 					height: modelBarcode.height * (8/10)
 				});
+				// draw serial text and barcode
 				page.drawText("Serial #:  " + serial, {
 					x: 3,
 					y: 11,
@@ -54,6 +56,7 @@ async function createPdf(data) {
 					font: timesRomanFont,
 					color: rgb(0, 0, 0)
 				});
+				const serialBarcode = await pdfDoc.embedPng(canvasStream(serial, 1));
 				scaleFactor = (1/2) * (width/serialBarcode.width);
 				page.drawImage(serialBarcode, {
 					x: (width / 2) - ((serialBarcode.width * scaleFactor) / 2) - 7,
@@ -61,6 +64,7 @@ async function createPdf(data) {
 					width: serialBarcode.width * scaleFactor * 1.7,
 					height: serialBarcode.height * (8/10)
 				});
+				//draw rev
 				page.drawText("REV.: 1.0", {
 					x: 3.5,
 					y: 2,
@@ -70,20 +74,21 @@ async function createPdf(data) {
 				});
 				break;
 			case '1901':
-				fontSize = 4;
-				page.drawText(serial, {
-					x: width/2 - serial.length,
-					y: 6,
+				//draw model text and barcode
+				fontSize = 6;
+				page.drawText(data.model, {
+					x: width/2 - data.model.length * 2,
+					y: 5,
 					size: fontSize,
 					font: timesRomanFont,
 					color: rgb(0, 0, 0)
 				});
-				scaleFactor = (width/serialBarcode.width);
-				page.drawImage(serialBarcode, {
-					x: 0,
-					y: -2,//(1/8)*height,// - serialBarcode.height,
-					width: serialBarcode.width * scaleFactor,
-					height: height * 0.95
+				scaleFactor = (width/modelBarcode.width);
+				page.drawImage(modelBarcode, {
+					x: -1,
+					y: -5.5,//(1/8)*height,// - serialBarcode.height,
+					width: modelBarcode.width * scaleFactor,
+					height: height * 1.5
 				});
 		}
 

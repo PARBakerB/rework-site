@@ -20,8 +20,6 @@ var reworkParts = document.getElementsByClassName("rw-part");
 var inOut = [0,0];
 var disabledArray = [];
 const assemblyPartNumbers = ['M9100-10','M9100-11','M9110-11','M9110-21'];
-const M910010to11 = [1, 1, "M9100-10", "M9100-11", [true, true, true], "980029758", "POS-TGL-BC1", [true, false, true], "980029756", "20M204DA4"];
-const M911011to21 = [1, 2, "M9110-11", "M9110-21", [true, false, true], "980029707", "TS128GMTE652T-PAR", [true, false, true], "980029706", "TS1GSH64V2B-PAR", [true, false, true], "980029757", "TS256GMTE712A-PAR"]
 
 // REFRESH PAGE ELEMENT VARIABLES THAT CHANGE DURING UI INTERACTION
 function updateVariableElements() {
@@ -76,25 +74,6 @@ async function postRework(rwdata) {
 		url: stringdata,
 		headers: {'Content-Type' : 'application/x-www-form-urlencoded'}
 	});
-}
-
-// ASK WHICH PARTS NEED TO BE CHANGED FOR REWORK
-async function howRework(ft, mn) {
-	let dataObj = {fakeTerm: ft, modelNumber: mn}
-	return ( await axios({
-		method: 'post',
-		url: '420compare420',
-		data: JSON.stringify(dataObj)
-	})).data;
-}
-
-// GET GENERIC DESCRIPTOR FOR A TERMINAL MODEL NUMBER
-async function getTermJSON(mn) {
-	return ( await axios ({
-		method: 'post',
-		url: '420getModel420',
-		data: mn
-	})).data;
 }
 
 // GET MANUFACTURER PART NUMBERS FOR A PAR PART
@@ -380,7 +359,7 @@ Object.values(document.getElementById("printButtons").children).forEach(printBut
 
 	const printFrame = document.createElement("iframe");
 	printFrame.onload = () => {
-		printFrame.contentWindow.print();
+		//printFrame.contentWindow.print();
 	}
 	printFrame.setAttribute('id', 'printFrame');
 

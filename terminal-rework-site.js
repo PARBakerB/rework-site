@@ -2,10 +2,9 @@ import * as https from 'node:https';
 //import * as http from 'node:http';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { Buffer } from 'buffer';
 
 import { greatestLogDate } from './modules/fileDate.js';
-import { getModel, compareModels, getMFG, getBOMFromProd, getSearchName } from './modules/partObjects.js';
+import { getMFG, getBOMFromProd, getSearchName } from './modules/partObjects.js';
 import { createPdf } from './modules/pdf.js';
 
 const PORT = 9615;
@@ -36,6 +35,29 @@ const options = {
 
 const toBool = [() => true, () => false];
 
+const updateDatabase = (req, res, filename) => {
+	let dataObject;
+	req.on('data', async j => {
+		dataObject = j.toString('utf8');
+	});
+	req.on('end', async j => {
+		let fileSoFar = (await fs.promises.readFile(DATABASE_PATH + "/" + filename)).toString('utf8');
+		let newFile = "";
+		// checks if this is the first post in a series
+		if (dataObject.search("PROD-000001") != -1) {
+			fs.promises.writeFile(DATABASE_PATH + "/" + filename, "");
+			fs.promises.writeFile(DATABASE_PATH + "/" + filename, dataObject);
+		} else {
+			dataObject = dataObject.substring(1,dataObject.length);
+			fileSoFar = fileSoFar.substring(0,fileSoFar.length-1);
+			newFile = fileSoFar + dataObject;
+			fs.promises.writeFile(DATABASE_PATH + "/" + filename, newFile);
+		}
+		res.end();
+	});
+	console.log("Updated: " + filename);
+}
+
 const getResponse = async (url) => {
 	if (url.endsWith('log.csv')) {
 		const found = true;
@@ -58,32 +80,7 @@ const getResponse = async (url) => {
 	}
 };
 const postResponse = async (req, res) => {
-	if (req.url === "/PROD-BOM-UPDATE") {
-		/* Wiped the file every time a post was received, now updated every time data starts from beginning
-		fs.writeFileSync(
-			STATIC_PATH + "/prodboms.json",
-			"",
-			err => {if (err) throw err;});
-			*/
-		req.on('data', async dataReceived => {
-			// this if checks if this is the first post in a series
-			if (JSON.parse(dataReceived)[0].ProductionOrderNumber == "PROD-000001") {
-				fs.writeFileSync(
-					DATABASE_PATH + "/prodboms.json",
-					"",
-					err => {if (err) throw err;});
-			}
-			fs.appendFile(
-				DATABASE_PATH + "/prodboms.json",
-				dataReceived,
-				err => {if (err) throw err;});
-		});
-		req.on('end', async j => {
-			res.end();
-		});
-	} else {
-		fs.appendFile(logFileName, req.url.substring(1) + '\n', function (err) {if (err) throw err;});
-	}
+	fs.appendFile(logFileName, req.url.substring(1) + '\n', function (err) {if (err) throw err;});
 	const found = true;
 	const ext = 'html';
 	const streamPath = [STATIC_PATH, '/', 'index.html'];
@@ -91,29 +88,7 @@ const postResponse = async (req, res) => {
 	return { found, ext, stream };
 };
 const fileServ = async (req, res) => {
-	if (req.url === '/420compare420') {
-		let response = "";
-		req.on('data', async j => {
-			response = j.toString('utf8');
-			response = JSON.parse(response);
-		});
-		req.on('end', async () => {
-			response = compareModels(response.fakeTerm, await getModel(response.modelNumber));
-			res.writeHead(200, { 'Content-Type': 'application/json' });
-			res.write(JSON.stringify(response));
-			res.end();
-		});
-	} else if (req.url === '/420getModel420') {
-		let response = "";
-		req.on('data', async j => {
-			response = j.toString('utf8');
-		});
-		req.on('end', async () => {
-			response = await getModel(response);
-			res.writeHead(200, { 'Content-Type': 'application/json' });
-			res.end();
-		});
-	} else if (req.url === '/420getMFG420') {
+	if (req.url === '/420getMFG420') {
 		let response = "";
 		req.on('data', async j => {
 			response = j.toString('utf8');
@@ -191,6 +166,10 @@ const fileServ = async (req, res) => {
 			res.write("print.pdf")
 			res.end();
 		});
+	} else if (req.url === "/PROD-BOM-UPDATE") {
+		updateDatabase(req, res, "prodboms.json");
+	} else if (req.url === "/PROD-HEADERS") {
+		updateDatabase(req, res, "prodheaders.json");
 	} else {
 		const file = req.method === 'POST' ? await postResponse(req, res) : await getResponse(req.url);
 		const statusCode = file.found ? 200 : 404;
