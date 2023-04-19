@@ -3,13 +3,13 @@ export class Part {
 	constructor (elem) {
 		this.webElement = elem;
 		this.checks = [
-			elem.children[0].children[1].children[0].children[0].checked,
-			elem.children[0].children[2].children[0].children[0].checked,
-			elem.children[0].children[3].children[0].children[0].checked
+			elem.children[0].children[0].children[1].children[0].children[0].children[0].checked,
+			elem.children[0].children[0].children[3].children[0].children[0].children[0].checked,
+			elem.children[0].children[0].children[4].children[0].children[0].children[0].checked
 		];
 		this.fields = [
-			elem.children[1].children[0].children[0].children[0].children[0].children[0].value,
-			elem.children[1].children[0].children[2].children[0].children[0].children[0].value,
+			elem.children[0].children[0].children[0].children[0].children[0].children[0].value,
+			elem.children[0].children[0].children[2].children[0].children[0].children[0].value,
 		];
 	}
 	// save this part configuration as a jsObject
@@ -36,18 +36,18 @@ export class Part {
 		this.fields = savedObj.fields;
 		await this.updatePartName(savedObj.fields[0]);
 
-		this.webElement.children[0].children[1].children[0].children[0].checked = savedObj.checks[0];
-		this.webElement.children[0].children[2].children[0].children[0].checked = savedObj.checks[1];
-		this.webElement.children[0].children[3].children[0].children[0].checked = savedObj.checks[2];
-	
-		this.webElement.children[1].children[0].children[0].children[0].children[0].children[0].value = savedObj.fields[0];
+		this.webElement.children[0].children[0].children[1].children[0].children[0].children[0].checked = savedObj.checks[0];
+		this.webElement.children[0].children[0].children[3].children[0].children[0].children[0].checked = savedObj.checks[1];
+		this.webElement.children[0].children[0].children[4].children[0].children[0].children[0].checked = savedObj.checks[2];
+
+		this.webElement.children[0].children[0].children[0].children[0].children[0].children[0].value = savedObj.fields[0];
 		await this.addDropDown();
-		this.webElement.children[1].children[0].children[2].children[0].children[0].children[0].value = savedObj.fields[1];	
+		this.webElement.children[0].children[0].children[2].children[0].children[0].children[0].value = savedObj.fields[1];	
 	}
 	// add dropdown options to mfg part field
 	addDropDown = async (
 		parPartValue = this.fields[0],
-		fieldDivContainer = this.webElement.children[1].children[0].children[2].children[0]
+		fieldDivContainer = this.webElement.children[0].children[0].children[2].children[0]
 	) => {
 		let inputField = fieldDivContainer.children[0].children[0];
 		let mfgPartsList = await this.getMFG(parPartValue);
