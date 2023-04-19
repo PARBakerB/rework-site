@@ -147,15 +147,6 @@ send.addEventListener('click', () => {
 	input.elements[0].focus();
 });
 
-// HELPER FUNCTION FOR INPUT CYCLE, UPDATES THE VALUES IN checks TO BE RELATIVE TO CURRENT CONTEXT
-function refreshChecks(iter) {
-	let checks = [];
-	for (let x=1; x<4; x++) {
-		checks.push(checkForms[Math.floor(iter/8)].children[x].children[0].children[0].checked);
-	}
-	return checks;
-}
-
 //MISTAKEN SCAN ERROR DETECTION
 function scanErrorDetect(index) {
 	let modelIn = qtyInput[3].value;
@@ -171,46 +162,29 @@ function scanErrorDetect(index) {
 
 // NAVIGATING BETWEEN INPUTS AND FORM SUBMISSION USING ENTER KEY
 function inputCycle(event) {
-	let index = [...input].indexOf(event.target);
-	let ii = index-1 > -1 ? index-1 : 0;
-	let checks = [];
-	if (event.key==="Enter") {
-		if (!scanErrorDetect(index)) {
-			document.getElementById("errorLightUpWindow").classList.remove("error-container");
-			if (ii%8 < 3) {
-				index = input.elements[(Math.floor(ii/8)*8)+4].value !== "" ? (Math.floor(ii/8)*8)+5 : (Math.floor(ii/8)*8)+4;
-				ii = index-1;
-				checks = refreshChecks(ii);
-				input.elements[index].focus();
-			}
-			try {
-				while ((input.elements[index].value !== "") || (ii%8 === 4 && checks[0]) || (ii%8 === 6 && checks[1]) || (ii%8 === 7 && checks[2])) {
-					index++;
-					ii++;
-					if (ii%8 < 3) {
-						index = input.elements[(Math.floor(ii/8)*8)+4].value !== "" ? (Math.floor(ii/8)*8)+5 : (Math.floor(ii/8)*8)+4;
-						ii = index-1;
-					}
-					checks = refreshChecks(ii);
-				}
-				input.elements[index].focus();
-			} catch {
-				if (input.elements[0].value !== "") {
-					let usedPartsArray = [];
-					Object.values(reworkParts).forEach(part => {
-						usedPartsArray.push(new Part(part));
-					});
-					usedPartsArray.forEach(part => { part.savePart(); });
-					postInputs();
-					errMsg.innerText = "";
-				} else {
-					playBuzzer();
-					errMsg.innerText = "Please enter an assembly serial number to log a rework.";
-				}
-				// return to first input
-				input.elements[0].focus();
-			}
+	if (event.key !== "Enter") return;
+	let textInputFields = [];
+	for (const field of input.elements) {if (field.type === "text") textInputFields.push(field);}
+
+	let textInputIndex = [...textInputFields].indexOf(event.target);
+	if(scanErrorDetect([...input].indexOf(event.target))) { textInputFields[0].value = ""; return; }
+	else { document.getElementById("errorLightUpWindow").classList.remove("error-container"); }
+
+	while (textInputIndex !== textInputFields.length - 1) {
+		textInputIndex = textInputIndex + 1;
+		let nextTextInput = textInputFields[textInputIndex];
+		let nextTextInputHasCheck = input.elements[[...input].indexOf(nextTextInput) -1].type === "checkbox";
+		let nextTextInputChecked = input.elements[[...input].indexOf(nextTextInput) -1].checked; 
+		if (nextTextInputHasCheck && nextTextInputChecked) {continue;}
+		else {
+			nextTextInput.focus();
+			break;
 		}
+	}
+
+	if (textInputIndex === textInputFields.length - 1) {
+		postInputs();
+		textInputFields[0].focus();
 	}
 }
 Object.values(inputs).forEach((j) => {j.addEventListener("keydown",inputCycle)});
@@ -229,10 +203,14 @@ async function qtyUpdate(event) {
 		if (isQty && checkQtys) {
 			let qty1 = qtyInput.elements[1].value !== "" ? parseInt(qtyInput.elements[1].value) : 0;
 			let qty2 = qtyInput.elements[2].value !== "" ? parseInt(qtyInput.elements[2].value) : 0;
-			let po = await getFile("PartsOut.html");
-			let pi =  await getFile("PartsIn.html");
-			let partOutInputs = po.data;
-			let partInInputs = pi.data;
+			let partFormat = (await getFile("PartFields.html")).data;
+			function splice (string, index, insert) {
+				let a = string.slice(0, index);
+				let b = string.slice(index);
+				return a + insert + b;
+			}
+			let partOutInputs = splice(partFormat, 20, "Part Out");
+			let partInInputs = splice(partFormat, 20, "Part In");
 			let partArray = new Array(qty1).fill(partOutInputs).concat(new Array(qty2).fill(partInInputs));
 			if (inOut[0] !== qty1 || inOut[1] !== qty2) {
 				document.getElementById('parts').innerHTML=partArray.join("");
@@ -240,6 +218,7 @@ async function qtyUpdate(event) {
 				inOut[1] = qty2;
 			}
 			updateVariableElements();
+			toggleVisibility(document.getElementById('checkboxHint'), 1);
 		}
 		else if (!checkQtys) {
 			document.getElementById('parts').innerHTML="";

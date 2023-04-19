@@ -35,27 +35,25 @@ const options = {
 
 const toBool = [() => true, () => false];
 
-const updateDatabase = (req, res, filename) => {
-	let dataObject;
+const updateDatabase = async (req, res, filename) => {
+	let dataObject = "";
 	req.on('data', async j => {
-		dataObject = j.toString('utf8');
+		dataObject += j.toString('utf8');
 	});
-	req.on('end', async j => {
+	req.on('end', async () => {
 		let fileSoFar = (await fs.promises.readFile(DATABASE_PATH + "/" + filename)).toString('utf8');
-		let newFile = "";
 		// checks if this is the first post in a series
-		if (dataObject.search("PROD-000001") != -1) {
-			fs.promises.writeFile(DATABASE_PATH + "/" + filename, "");
-			fs.promises.writeFile(DATABASE_PATH + "/" + filename, dataObject);
+		if (dataObject.substring(0,50).search("PROD-000000") != -1) {
+			await fs.promises.writeFile(DATABASE_PATH + "/" + filename, "[]");
 		} else {
 			dataObject = dataObject.substring(1,dataObject.length);
 			fileSoFar = fileSoFar.substring(0,fileSoFar.length-1);
-			newFile = fileSoFar + dataObject;
-			fs.promises.writeFile(DATABASE_PATH + "/" + filename, newFile);
+			let newFile = fileSoFar === "[" ? fileSoFar + dataObject : fileSoFar + "," + dataObject;
+			await fs.promises.writeFile(DATABASE_PATH + "/" + filename, newFile);
 		}
 		res.end();
+		console.log("Logged to: " + filename);
 	});
-	console.log("Updated: " + filename);
 }
 
 const getResponse = async (url) => {
@@ -161,7 +159,6 @@ const fileServ = async (req, res) => {
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': MIME_TYPES['pdf'] });
 			let pdfData = await createPdf(response);
-			//res.write(pdfData);
 			await fs.promises.writeFile('./static/print.pdf', pdfData);
 			res.write("print.pdf")
 			res.end();
