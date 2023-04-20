@@ -24,7 +24,9 @@ const assemblyPartNumbers = ['M9100-10','M9100-11','M9110-11','M9110-21'];
 // REFRESH PAGE ELEMENT VARIABLES THAT CHANGE DURING UI INTERACTION
 function updateVariableElements() {
 	inputs = document.getElementsByClassName('inputs');
-	Object.values(inputs).forEach((j) => {if (j.getAttribute('listener') !== 'true') {j.addEventListener("keydown",inputCycle)}});
+	Object.values(inputs).forEach((j) => {
+		j.addEventListener("keydown",inputCycle);
+	});
 	checkForms = document.getElementsByClassName('checkboxes');
 	reworkParts = document.getElementsByClassName("rw-part");
 }
@@ -169,7 +171,6 @@ function inputCycle(event) {
 	let textInputIndex = [...textInputFields].indexOf(event.target);
 	if(scanErrorDetect([...input].indexOf(event.target))) { textInputFields[0].value = ""; return; }
 	else { document.getElementById("errorLightUpWindow").classList.remove("error-container"); }
-
 	while (textInputIndex !== textInputFields.length - 1) {
 		textInputIndex = textInputIndex + 1;
 		let nextTextInput = textInputFields[textInputIndex];
@@ -217,14 +218,12 @@ async function qtyUpdate(event) {
 				inOut[0] = qty1;
 				inOut[1] = qty2;
 			}
-			updateVariableElements();
 			toggleVisibility(document.getElementById('checkboxHint'), 1);
 		}
 		else if (!checkQtys) {
 			document.getElementById('parts').innerHTML="";
 			inOut[0] = 0;
 			inOut[1] = 0;
-			updateVariableElements();
 		}
 	}
 }
@@ -281,7 +280,7 @@ async function autoSetupByProd() {
 
 	// iterate through the bom again and autofill the newly generated part fields 
 	// BOMOBJECT: { make, sourceBOMId, itemNum, qty }
-	bom.forEach(async bomObject => {
+	await Promise.all(bom.map(async bomObject => {
 		if (stringInWCList(bomObject.itemNum,["M6*","M9*","T8*"])) {return;}
 		// get part fields off the top of either assigned array
 		let assignedPartFormInput = bomObject.qty > 0 ? partsIn.pop() : partsOut.pop();
@@ -290,8 +289,9 @@ async function autoSetupByProd() {
 		// get mfg parts list of item number from bom object
 		let mfgPartsList = await getMFG(bomObject.itemNum);
 		valuesObject.fields[1] = mfgPartsList[0];
-		assignedPartFormInput.writePart(valuesObject);
-	});
+		await assignedPartFormInput.writePart(valuesObject);
+	}));
+	updateVariableElements();
 }
 
 // MOVES FOCUS TO BEGINNING OF FORM ON ENTER PRESS IN NOTES FIELD
