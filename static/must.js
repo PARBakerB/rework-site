@@ -362,8 +362,8 @@ Object.values(document.getElementById("printButtons").children).forEach(printBut
 		}
 	});
 	if (requestedSerials == []) return -1;
-	
-	let postData = {label: printButton.value.split(" ")[0], model: reworkModel, serials: requestedSerials};
+	console.log(printButton.value.slice(0,-6))
+	let postData = {label: printButton.value.slice(0,-6), model: reworkModel, serials: requestedSerials};
 
 	printFrame.src = (await axios({
 		method: 'post',
