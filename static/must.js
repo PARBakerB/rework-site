@@ -175,8 +175,9 @@ function inputCycle(event) {
 		textInputIndex = textInputIndex + 1;
 		let nextTextInput = textInputFields[textInputIndex];
 		let nextTextInputHasCheck = input.elements[[...input].indexOf(nextTextInput) -1].type === "checkbox";
-		let nextTextInputChecked = input.elements[[...input].indexOf(nextTextInput) -1].checked; 
-		if (nextTextInputHasCheck && nextTextInputChecked) {continue;}
+		let nextTextInputChecked = input.elements[[...input].indexOf(nextTextInput) -1].checked;
+		let nextInputAlreadyPopulated = nextTextInput.value !== "";
+		if ((nextTextInputHasCheck && nextTextInputChecked) || nextInputAlreadyPopulated) {continue;}
 		else {
 			nextTextInput.focus();
 			break;
@@ -192,12 +193,12 @@ Object.values(inputs).forEach((j) => {j.addEventListener("keydown",inputCycle)})
 
 // GRAB QTY INPUTS ON UPDATE, CYCLE THROUGH FORM ON ENTER
 async function qtyUpdate(event) {
+	let index = [...qtyInput].indexOf(event.target);
+	if (event.key==="Enter" && index == 0 ) { autoSetupByProd(); return; }
 	if (event.key==="Enter" || event.target == null) {
-		let index = [...qtyInput].indexOf(event.target);
-		if (index <= 7) {
+		if (index <= 7 && event.target != null) {
 			qtyInput.elements[index + 1].focus();
-			if (index == 0) { autoSetupByProd(); }
-		}
+		} else if (event.target == null) {qtyInput.elements[5].focus();}
 		else {input.elements[0].focus();}
 		let isQty = [1, 2].includes(index) || event.target == null;
 		let checkQtys = (qtyInput.elements[1].value !== "" || qtyInput.elements[2].value !== "");
@@ -238,9 +239,9 @@ async function autoSetupByProd() {
 	let partsOutQty = 0;
 	let partsInQty = 0;
 
-	qtyInput.elements[1].value = partsOutQty;
-	qtyInput.elements[2].value = partsInQty;
-	await qtyUpdate(document.createEvent('Event'));
+	// qtyInput.elements[1].value = partsOutQty;
+	// qtyInput.elements[2].value = partsInQty;
+	// await qtyUpdate(document.createEvent('Event'));
 
 	function stringInWCList (str, wildcards) {
 		let matches = false;
