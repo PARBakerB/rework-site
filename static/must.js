@@ -219,11 +219,13 @@ async function qtyUpdate(event) {
 				inOut[1] = qty2;
 			}
 			toggleVisibility(document.getElementById('checkboxHint'), 1);
+			updateVariableElements();
 		}
 		else if (!checkQtys) {
 			document.getElementById('parts').innerHTML="";
 			inOut[0] = 0;
 			inOut[1] = 0;
+			updateVariableElements();
 		}
 	}
 }
