@@ -333,16 +333,22 @@ async function viewLog(event) {
 }
 Object.values(logReqs).forEach((j)=>{j.addEventListener("keyup",viewLog);});
 
-Object.values(document.getElementById("printButtons").children).forEach(printButton => 
-	printButton.addEventListener('click', async () =>
-	{
+// DISPLAYS A PDF IN AN IFRAME THAT CONTAINS REWORK DATA BASED ON PROD AND QTY FIELDS
+async function make_iFrame (event)
+{
+	if (logReqs[0].value === '' || logReqs[1].value === '') {
+		toggleVisibility(document.getElementById('logReqError'), 1);
+		return;
+	} else { toggleVisibility(document.getElementById('logReqError'), 0); }
+	let printButton = event.target;
 	let iFrameContainer = document.getElementById('pdf-Iframe');
 	if (iFrameContainer.children.length != 0) iFrameContainer.innerHTML = "";
 
 	const printFrame = document.createElement("iframe");
-	printFrame.onload = () => {
-		//printFrame.contentWindow.print();
+	function pfOnload() {
+		this.contentWindow.print();
 	}
+	printFrame.onload = pfOnload;
 	printFrame.setAttribute('id', 'printFrame');
 
 	let requestedSerials = [];
@@ -362,7 +368,6 @@ Object.values(document.getElementById("printButtons").children).forEach(printBut
 		}
 	});
 	if (requestedSerials == []) return -1;
-	console.log(printButton.value.slice(0,-6))
 	let postData = {label: printButton.value.slice(0,-6), model: reworkModel, serials: requestedSerials};
 
 	printFrame.src = (await axios({
@@ -372,4 +377,7 @@ Object.values(document.getElementById("printButtons").children).forEach(printBut
 	})).data;
 
 	iFrameContainer.appendChild(printFrame);
-}));
+}
+// BUTTONS CHOOSE WHICH TYPE OF PDF DOCUMENT TO DISPLAY
+Object.values(document.getElementById("printButtons").children).forEach(printButton => 
+	printButton.addEventListener('click', make_iFrame));

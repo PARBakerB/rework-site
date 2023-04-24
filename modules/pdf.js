@@ -2,13 +2,15 @@ import * as fs from 'node:fs';
 
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { canvasStream } from './canvas.js';
+import { commonFormatDate } from './fileDate.js';
 
 // inches to pixels conversion: vertical - 41.66, horizontal - 50
 const pdfLibSizeRef = {
 // 'name': [width, height]
   '18x11': [550, 750],
   'Phase 1801': [100, 41],
-  '1801': [100, 41],
+  'Model Serial 1801': [100, 41],
+  'Box Serial 1801': [100, 41],
   '1806': [175, 75],
   '1901': [87.5, 10]
 }
@@ -30,6 +32,32 @@ async function createPdf(data) {
 		const {width, height} = page.getSize();
 		let scaleFactor = 1;
 		switch (data.label) {
+			case 'Box Serial 1801':
+				// draw serial text and barcode
+				page.drawText(serial, {
+					x: (width / 2) - ((serial.length * fontSize) / 3.5),
+					y: 28,
+					size: fontSize+4,
+					font: timesRomanFont,
+					color: rgb(0, 0, 0)
+				});
+				serialBarcode = await pdfDoc.embedPng(canvasStream(serial, 1));
+				scaleFactor = (1/2) * (width/serialBarcode.width);
+				page.drawImage(serialBarcode, {
+					x: (width / 2) - ((serialBarcode.width * scaleFactor) / 2) - 22,
+					y: -9,//(1/8)*height,// - serialBarcode.height,
+					width: serialBarcode.width * scaleFactor * 1.9,
+					height: serialBarcode.height *1.5
+				});
+				//draw rev
+				page.drawText("DATE: " + commonFormatDate(), {
+					x: 3.5,
+					y: 2,
+					size: fontSize-3,
+					font: timesRomanFont,
+					color: rgb(0, 0, 0)
+				});
+				break;
 			case 'Phase 1801':
 				// draw logo
 				scaleFactor = (((2/5)* width) / tm_stream.width);
@@ -79,7 +107,7 @@ async function createPdf(data) {
 					color: rgb(0, 0, 0)
 				});
 				break;
-			case '1801':
+			case 'Model Serial 1801':
 				//draw model text and barcode
 				page.drawText("Model #:        " + data.model, {
 					x: 3,

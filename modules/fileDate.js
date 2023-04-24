@@ -27,3 +27,13 @@ export function greatestLogDate() {
 
     return fileNames[x.indexOf(Math.max(...x))];
 }
+
+export function commonFormatDate() {
+    let today = Date().toString().slice(4,15);
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    for ( let month of months) {
+        if (today.includes(month)) {today = (months.indexOf(month)+1) + today.slice(3,today.length);}
+    }
+    today = today.replace(/\s/g, "/");
+    return today;
+}
