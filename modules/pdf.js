@@ -10,7 +10,7 @@ const pdfLibSizeRef = {
   '18x11': [550, 750],
   'Phase 1801': [100, 41],
   'Model Serial 1801': [100, 41],
-  'Box Serial 1801': [100, 41],
+  'Box Model 1801': [100, 41],
   '1806': [175, 75],
   '1901': [87.5, 10]
 }
@@ -32,22 +32,21 @@ async function createPdf(data) {
 		const {width, height} = page.getSize();
 		let scaleFactor = 1;
 		switch (data.label) {
-			case 'Box Serial 1801':
+			case 'Box Model 1801':
 				// draw serial text and barcode
-				page.drawText(serial, {
-					x: (width / 2) - ((serial.length * fontSize) / 3.5),
+				page.drawText(data.model, {
+					x: (width / 2) - ((serial.length * fontSize) / 1.9),
 					y: 28,
 					size: fontSize+4,
 					font: timesRomanFont,
 					color: rgb(0, 0, 0)
 				});
-				serialBarcode = await pdfDoc.embedPng(canvasStream(serial, 1));
-				scaleFactor = (1/2) * (width/serialBarcode.width);
-				page.drawImage(serialBarcode, {
-					x: (width / 2) - ((serialBarcode.width * scaleFactor) / 2) - 22,
+				scaleFactor = (1/2) * (width/modelBarcode.width);
+				page.drawImage(modelBarcode, {
+					x: (width / 2) - ((modelBarcode.width * scaleFactor) / 2) - 22,
 					y: -9,//(1/8)*height,// - serialBarcode.height,
-					width: serialBarcode.width * scaleFactor * 1.9,
-					height: serialBarcode.height *1.5
+					width: modelBarcode.width * scaleFactor * 1.9,
+					height: modelBarcode.height *1.5
 				});
 				//draw rev
 				page.drawText("DATE: " + commonFormatDate(), {
