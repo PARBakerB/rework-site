@@ -7,9 +7,9 @@ var promFS = fs.promises;
 const MFG_PARTS_FILE = './database/Manufacturer-part-numbers.csv';
 const PROD_BOMS_FILE = './database/prodboms.json';
 const PART_DESCRIPTIONS_FILE = './database/searchNames.json';
-const PROD_HEADERS_FILE = './database/prodheaders.json'
+const PROD_HEADERS_FILE = './database/prodheaders.json';
 
-const BAD_BOM_ITEMS = ['754*', '755*', '893*', '713*', '772*', '850*', '262*', 'F*'];
+const BAD_BOM_ITEMS = ['754*', '755*', '893*', '713*', '772*', '850*', '262*', 'F*', 'CS*', 'SS*'];
 
 // REMOVES BOM ITEMS THAT ARE NOT TRACKED IN THE REWORK TOOL
 async function filterBOMArray(bomItems) {

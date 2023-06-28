@@ -35,7 +35,7 @@ async function createPdf(data) {
 			case 'Box Model 1801':
 				// draw serial text and barcode
 				page.drawText(data.model, {
-					x: (width / 2) - ((serial.length * fontSize) / 1.9),
+					x: (width / 2) - ((serial.length * fontSize) / 4),
 					y: 28,
 					size: fontSize+4,
 					font: timesRomanFont,
