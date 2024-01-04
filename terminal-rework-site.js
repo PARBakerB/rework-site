@@ -3,9 +3,9 @@ import * as https from 'node:https';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { greatestLogDate } from './modules/fileDate.js';
-import { getMFG, getBOMFromProd, getSearchName } from './modules/partObjects.js';
-import { createPdf } from './modules/pdf.js';
+import { greatestLogDate } from './backend/fileDate.js';
+import { getMFG, getBOMFromProd, getSearchName } from './backend/partObjects.js';
+import { createPdf } from './backend/pdf.js';
 
 const PORT = 9615;
 const MIME_TYPES = {
@@ -24,10 +24,12 @@ const MIME_TYPES = {
   mp3: 'audio/mp3',
   pdf: 'application/pdf'
 };
-const STATIC_PATH = path.join(process.cwd(), './static');
+const STATIC_PATH = path.join(process.cwd(), './frontend');
 const DATABASE_PATH = path.join(process.cwd(), './database');
 
 const logFileName = STATIC_PATH + '/logs/' + Date().slice(0,-39).replace(/ /g, "_") + '.csv';
+var lastUpdate;
+
 const options = {
 	key: fs.readFileSync('./STAR_partech_com.key'),
 	cert: fs.readFileSync('./STAR_partech_com.crt')
@@ -52,6 +54,7 @@ const updateDatabase = async (req, res, filename) => {
 			await fs.promises.writeFile(DATABASE_PATH + "/" + filename, newFile);
 		}
 		res.end();
+		lastUpdate = Date().toString().slice(4,15);
 		console.log("Logged to: " + filename);
 	});
 }
@@ -159,7 +162,7 @@ const fileServ = async (req, res) => {
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': MIME_TYPES['pdf'] });
 			let pdfData = await createPdf(response);
-			await fs.promises.writeFile('./static/print.pdf', pdfData);
+			await fs.promises.writeFile('./frontend/print.pdf', pdfData);
 			res.write("print.pdf")
 			res.end();
 		});
@@ -167,6 +170,12 @@ const fileServ = async (req, res) => {
 		updateDatabase(req, res, "prodboms.json");
 	} else if (req.url === "/PROD-HEADERS") {
 		updateDatabase(req, res, "prodheaders.json");
+	} else if (req.url === "/lastUpdate") {
+		req.on('end', async () => {
+			res.writeHead(200, { 'Content-Type': MIME_TYPES['html'] });
+			res.write("<p>The last database update was on " + lastUpdate + "</p>");
+			res.end();
+		});
 	} else {
 		const file = req.method === 'POST' ? await postResponse(req, res) : await getResponse(req.url);
 		const statusCode = file.found ? 200 : 404;

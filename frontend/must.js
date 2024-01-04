@@ -114,6 +114,15 @@ function getFile(fileName) {
 	});
 }
 
+// GET DATE TIME OF LAST DATABASE UPDATE
+function getUpdateTime() {
+	return axios({
+		method: 'get',
+		url: 'lastUpdate',
+		headers: {'Content-Type' : 'application/x-www-form-urlencoded'}
+	});
+}
+
 // FORM SUBMISSION USING SUBMIT BUTTON
 function postInputs() {
 	let qty1 = qtyInput.elements[1].value !== "" ? parseInt(qtyInput.elements[1].value) : 0;
@@ -234,6 +243,11 @@ Object.values(qtys).forEach((j) => {j.addEventListener("keyup",qtyUpdate)});
 
 // AUTOMATED PROD SETUP USING INFORMATION FROM PRODUCTION ORDER BOMS DATABASE AND MANUFACTURER PART NUMBER DATABASE
 async function autoSetupByProd() {
+	// update the "last update of database occurred on" div
+	let lastUpdate = await getUpdateTime();
+	let updateHistory = document.getElementById("lastUpdate");
+	updateHistory.innerHTML = lastUpdate;
+
 	// find the number of parts coming in and out based on the prod number
 	let bom = await getBOMFromProd(qtyInput.elements[0].value);
 	let partsOutQty = 0;

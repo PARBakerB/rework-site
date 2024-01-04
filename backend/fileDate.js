@@ -12,7 +12,7 @@ function fileStatsBirthTime() {
 
 export function greatestLogDate() {
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    let fileNames = fs.readdirSync("./static/logs");
+    let fileNames = fs.readdirSync("./frontend/logs");
     let badFileIndex = fileNames.indexOf('loginfo.txt');
     fileNames = fileNames.slice(0, badFileIndex).concat(fileNames.slice(badFileIndex + 1, fileNames.length));
 

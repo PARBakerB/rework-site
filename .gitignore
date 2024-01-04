@@ -13,17 +13,17 @@ obsolete/
 ref_json/
 
 #print files
-**/static/print.pdf
+**/frontend/print.pdf
 
 # Logs
-**/static/logs/*.csv
+**/frontend/logs/*.csv
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
-**/static/log.csv
+**/frontend/log.csv
 
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
