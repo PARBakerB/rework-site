@@ -12,7 +12,8 @@ const pdfLibSizeRef = {
   'Model Serial 1801': [100, 41],
   'Box Model 1801': [100, 41],
   '1806': [175, 75],
-  '1901': [87.5, 10]
+  '1901': [87.5, 10],
+  'Cycle Charge Label': [300, 300]
 }
 
 async function createPdf(data) {
@@ -32,6 +33,16 @@ async function createPdf(data) {
 		const {width, height} = page.getSize();
 		let scaleFactor = 1;
 		switch (data.label) {
+			case 'Cycle Charge Label':
+				// draw serial text and barcode
+				page.drawText(Date().slice(4, 15), {
+					x: 50,
+					y: 100,
+					size: fontSize+25,
+					font: timesRomanFont,
+					color: rgb(0, 0, 0)
+				});
+				break;
 			case 'Box Model 1801':
 				// draw serial text and barcode
 				page.drawText(data.model, {

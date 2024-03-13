@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Cycle Date Label</title>
+</head>
+
+<body>
+
+<div id="labeliFrameHolder"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script type="module">
+
+window.onload = async function createDateLabelIFrame()
+{
+	let iFrameContainer = document.getElementById('labeliFrameHolder');
+	if (iFrameContainer.children.length != 0) iFrameContainer.innerHTML = "";
+
+	const printFrame = document.createElement("iframe");
+	function pfOnload() {
+		this.contentWindow.print();
+	}
+	printFrame.onload = pfOnload;
+	printFrame.setAttribute('id', 'printFrame');
+
+	let postData = {label: 'Cycle Charge Label', model: "", serials:['Mon Dy Year']} 
+    printFrame.src = (await axios({
+		method: 'post',
+		url: "Cycle-Date",
+		data: JSON.stringify(postData)
+	})).data;
+
+    iFrameContainer.appendChild(printFrame);
+	printFrame.width = 500;
+	printFrame.height = 500;
+}
+
+</script>
+
+</body>
+</html>

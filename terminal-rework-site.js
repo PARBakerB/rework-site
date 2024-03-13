@@ -176,7 +176,19 @@ const fileServ = async (req, res) => {
 			res.write("<p>The last database update was on " + lastUpdate + "</p>");
 			res.end();
 		});
-	} else {
+	} else if (req.url === "/Cycle-Date") {
+		let response = "";
+		req.on('data', async j => {
+			response = JSON.parse(j.toString('utf8'));
+		});
+		req.on('end', async () => {
+			res.writeHead(200, { 'Content-Type': MIME_TYPES['pdf'] });
+			let pdfData = await createPdf(response);
+			await fs.promises.writeFile('./frontend/cycle.pdf', pdfData);
+			res.write("cycle.pdf");
+			res.end();
+		});
+	}else {
 		const file = req.method === 'POST' ? await postResponse(req, res) : await getResponse(req.url);
 		const statusCode = file.found ? 200 : 404;
 		const mimeType = MIME_TYPES[file.ext] || MIME_TYPES.default;
@@ -188,4 +200,5 @@ const fileServ = async (req, res) => {
 
 https.createServer(options, fileServ).listen(PORT);
 
-console.log(`Server running at https://127.0.0.1:${PORT}/`);
+//http.createServer(fileServ).listen(PORT);
+//console.log(`Server running at https://127.0.0.1:${PORT}/`);
