@@ -14,6 +14,7 @@ ref_json/
 
 #print files
 **/frontend/print.pdf
+**/frontend/cycle.pdf
 
 # Logs
 **/frontend/logs/*.csv

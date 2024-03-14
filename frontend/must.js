@@ -267,7 +267,7 @@ async function autoSetupByProd() {
 
 	bom.forEach(bomObject => {
 		if (bomObject.qty > 0) {
-			if (stringInWCList(bomObject.itemNum,["M6*","M9*","T8*"])) {
+			if (stringInWCList(bomObject.itemNum,["M6*","M9*","T8*","9880231*","M71*"])) {
 				qtyInput.elements[3].value = bomObject.itemNum;
 				qtyInput.elements[4].value = bomObject.make;
 				return;
@@ -298,7 +298,7 @@ async function autoSetupByProd() {
 	// iterate through the bom again and autofill the newly generated part fields 
 	// BOMOBJECT: { make, sourceBOMId, itemNum, qty }
 	await Promise.all(bom.map(async bomObject => {
-		if (stringInWCList(bomObject.itemNum,["M6*","M9*","T8*"])) {return;}
+		if (stringInWCList(bomObject.itemNum,["M6*","M9*","T8*","9880231*","M71*"])) {return;}
 		// get part fields off the top of either assigned array
 		let assignedPartFormInput = bomObject.qty > 0 ? partsIn.pop() : partsOut.pop();
 		let valuesObject = {checks: [1,1,1], fields:[bomObject.itemNum,""]};
