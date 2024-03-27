@@ -246,7 +246,7 @@ async function autoSetupByProd() {
 	// update the "last update of database occurred on" div
 	let lastUpdate = await getUpdateTime();
 	let updateHistory = document.getElementById("lastUpdate");
-	updateHistory.innerHTML = lastUpdate;
+	updateHistory.innerHTML = lastUpdate.data;
 
 	// find the number of parts coming in and out based on the prod number
 	let bom = await getBOMFromProd(qtyInput.elements[0].value);

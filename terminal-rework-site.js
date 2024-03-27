@@ -27,8 +27,8 @@ const MIME_TYPES = {
 const STATIC_PATH = path.join(process.cwd(), './frontend');
 const DATABASE_PATH = path.join(process.cwd(), './database');
 
-const logFileName = STATIC_PATH + '/logs/' + Date().slice(0,-39).replace(/ /g, "_") + '.csv';
-var lastUpdate;
+const logFileName = STATIC_PATH + '/logs/' + Date().slice(0,-39).replace(/ /g, "_").replace(/:/g, "-") + '.csv';
+var lastUpdate = Date().toString().slice(4,10) + " " + Date().toString().slice(13,15) + " at " + Date().toString().slice(16,21);
 
 const options = {
 	key: fs.readFileSync('./STAR_partech_com.key'),
@@ -54,7 +54,7 @@ const updateDatabase = async (req, res, filename) => {
 			await fs.promises.writeFile(DATABASE_PATH + "/" + filename, newFile);
 		}
 		res.end();
-		lastUpdate = Date().toString().slice(4,15);
+		lastUpdate = Date().toString().slice(4,10) + " " + Date().toString().slice(13,15) + " at " + Date().toString().slice(16,21);
 		console.log("Logged to: " + filename);
 	});
 }
@@ -171,6 +171,7 @@ const fileServ = async (req, res) => {
 	} else if (req.url === "/PROD-HEADERS") {
 		updateDatabase(req, res, "prodheaders.json");
 	} else if (req.url === "/lastUpdate") {
+		req.on('data', ()=>{});
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': MIME_TYPES['html'] });
 			res.write("<p>The last database update was on " + lastUpdate + "</p>");
@@ -188,7 +189,19 @@ const fileServ = async (req, res) => {
 			res.write("cycle.pdf");
 			res.end();
 		});
-	}else {
+	}else if (req.url === "/Service-Repair-Label") {
+		let response = "";
+		req.on('data', async j => {
+			response = JSON.parse(j.toString('utf8'));
+		});
+		req.on('end', async () => {
+			res.writeHead(200, { 'Content-Type': MIME_TYPES['pdf'] });
+			let pdfData = await createPdf(response);
+			await fs.promises.writeFile('./frontend/SRL.pdf', pdfData);
+			res.write("SRL.pdf")
+			res.end();
+		});
+	} else {
 		const file = req.method === 'POST' ? await postResponse(req, res) : await getResponse(req.url);
 		const statusCode = file.found ? 200 : 404;
 		const mimeType = MIME_TYPES[file.ext] || MIME_TYPES.default;

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>SR Label</title>
+</head>
+
+<body>
+
+<div>
+	<label>PR#:<input type="text" class="inputs" id="pr#"></label>
+	<br>
+	<label>Location:<input type="text" class="inputs" id="loc"></label>
+	<br>
+	<label>Initials:<input type="text" class="inputs" id="ini"></label>
+	<br>
+	<input id="printButton" type="button" value="Submit">
+	<br>
+</div>
+
+<div id="labeliFrameHolder"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script type="module">
+
+async function createDateLabelIFrame()
+{
+	let iFrameContainer = document.getElementById('labeliFrameHolder');
+	if (iFrameContainer.children.length != 0) iFrameContainer.innerHTML = "";
+
+	const printFrame = document.createElement("iframe");
+	function pfOnload() {
+		this.contentWindow.print();
+	}
+	printFrame.onload = pfOnload;
+	printFrame.setAttribute('id', 'printFrame');
+
+	let pr = document.getElementById("pr#").value;
+	let loc = document.getElementById("loc").value;
+	let ini = document.getElementById("ini").value;
+
+	let postData = {label: 'Service Repair 1801', model: pr, serials:[loc], initial: ini} 
+    printFrame.src = (await axios({
+		method: 'post',
+		url: "Cycle-Date",
+		data: JSON.stringify(postData)
+	})).data;
+
+    iFrameContainer.appendChild(printFrame);
+	printFrame.width = 500;
+	printFrame.height = 500;
+}
+
+document.getElementById("printButton").addEventListener('click', createDateLabelIFrame);
+
+</script>
+
+</body>
+</html>

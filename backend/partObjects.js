@@ -2,7 +2,6 @@
 //import axios from 'axios';
 //axios.defaults.withCredentials = true;
 import * as fs from 'node:fs';
-var promFS = fs.promises;
 
 const MFG_PARTS_FILE = './database/Manufacturer-part-numbers.csv';
 const PROD_BOMS_FILE = './database/prodboms.json';
