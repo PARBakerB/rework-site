@@ -7,6 +7,7 @@ import { greatestLogDate } from './backend/fileDate.js';
 import { getMFG, getBOMFromProd, getSearchName } from './backend/partObjects.js';
 import { createPdf } from './backend/pdf.js';
 
+process.env.TZ = 'EST5EDT';
 const PORT = 9615;
 const MIME_TYPES = {
   default: 'application/octet-stream',

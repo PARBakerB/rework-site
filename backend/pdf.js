@@ -1,6 +1,6 @@
 import * as fs from 'node:fs';
 
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument, StandardFonts, rgb, degrees } from 'pdf-lib';
 import { canvasStream } from './canvas.js';
 import { commonFormatDate } from './fileDate.js';
 
@@ -64,6 +64,7 @@ async function createPdf(data) {
 					font: timesRomanFont,
 					color: rgb(0,0,0)
 				});
+				page.setRotation(degrees(90));
 				break;
 			case 'Cycle Charge Label':
 				page.drawText(Date().slice(4, 15), {
