@@ -29,7 +29,7 @@ const STATIC_PATH = path.join(process.cwd(), './frontend');
 const DATABASE_PATH = path.join(process.cwd(), './database');
 
 const logFileName = STATIC_PATH + '/logs/' + Date().slice(0,-39).replace(/ /g, "_").replace(/:/g, "-") + '.csv';
-var lastUpdate = Date().toString().slice(4,10) + " " + Date().toString().slice(13,15) + " at " + Date().toString().slice(16,21);
+var lastUpdate = Date().toString().slice(4,10) + " " + Date().toString().slice(13,15) + " at " + Date().toString().slice(16,21) + " EST";
 
 const options = {
 	key: fs.readFileSync('./STAR_partech_com.key'),

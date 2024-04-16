@@ -129,7 +129,8 @@ function postInputs() {
 	let qty2 = qtyInput.elements[2].value !== "" ? parseInt(qtyInput.elements[2].value) : 0;
 	let partQty = [qty1, qty2];
 	let arraysize = partQty[1]>partQty[0] ? partQty[1]*5*2 : (partQty[0]*5*2)-5;
-	let rwdata = new Array(arraysize + 2);
+	let rwDataQty = arraysize + 2 >= 0 ? arraysize + 2 : 0;
+	let rwdata = new Array(rwDataQty);
 	let i = -1;
 	Object.values(inputs).forEach((j) => {
 		// csv format processing for insertion into excel
@@ -145,7 +146,7 @@ function postInputs() {
 		if (!(i%5 === 0 || i%5 === 2)) {j.value='';}
 		i++;
 	});
-	rwdata[i] = notesInput.value;
+	if ( i === 0 ) { rwdata[1] = notesInput.value; } else { rwdata[i] = notesInput.value; }
 	notesInput.value = '';
 	let statarray = [qtyInput.elements[0].value,qtyInput.elements[5].value,qtyInput.elements[3].value,
 		qtyInput.elements[4].value,rwdata[0],qtyInput.elements[6].value, 
