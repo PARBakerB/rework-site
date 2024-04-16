@@ -21,6 +21,16 @@ var inOut = [0,0];
 var disabledArray = [];
 const assemblyPartNumbers = ['M9100-10','M9100-11','M9110-11','M9110-21'];
 
+// DISABLE ENTER PRESS IN FORM
+window.addEventListener('keydown', function(e) {
+	if (e.keyIdentifier=='U+000A' || e.keyIdentifier=='Enter' || e.keyCode==13) {
+		if (e.target.nodeName==='INPUT' && e.target.type==='text') {
+			e.preventDefault();
+			return false;
+		}
+	}
+}, true);
+
 // REFRESH PAGE ELEMENT VARIABLES THAT CHANGE DURING UI INTERACTION
 function updateVariableElements() {
 	inputs = document.getElementsByClassName('inputs');
