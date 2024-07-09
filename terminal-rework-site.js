@@ -5,8 +5,14 @@ import * as path from 'node:path';
 
 import { greatestLogDate } from './backend/fileDate.js';
 import { getMFG, getBOMFromProd, getSearchName } from './backend/partObjects.js';
+import { ioManager } from './backend/ioManager.js';
 import { createPdf } from './backend/pdf.js';
 
+const fsManager = new ioManager();
+
+export default {
+	fsManager
+}
 process.env.TZ = 'EST5EDT';
 const PORT = 9615;
 const MIME_TYPES = {
@@ -27,14 +33,13 @@ const MIME_TYPES = {
 };
 const STATIC_PATH = path.join(process.cwd(), './frontend');
 const DATABASE_PATH = path.join(process.cwd(), './database');
-
 const logFileName = STATIC_PATH + '/logs/' + Date().slice(0,-39).replace(/ /g, "_").replace(/:/g, "-") + '.csv';
 var lastUpdate = Date().toString().slice(4,10) + " " + Date().toString().slice(13,15) + " at " + Date().toString().slice(16,21) + " EST";
-
 const options = {
 	key: fs.readFileSync('./STAR_partech_com.key'),
 	cert: fs.readFileSync('./STAR_partech_com.crt')
 };
+
 
 const toBool = [() => true, () => false];
 
@@ -199,7 +204,17 @@ const fileServ = async (req, res) => {
 			res.writeHead(200, { 'Content-Type': MIME_TYPES['pdf'] });
 			let pdfData = await createPdf(response);
 			await fs.promises.writeFile('./frontend/SRL.pdf', pdfData);
-			res.write("SRL.pdf")
+			res.write("SRL.pdf");
+			res.end();
+		});
+	} else if (req.url === "/CTOLoadLog") {
+		let response = "";
+		req.on('data', async j => {
+			response = j.toString('utf8');
+		});
+		req.on('end', async () => {
+			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+			await fsManager.write('./frontend/LoadLog.csv', response);
 			res.end();
 		});
 	} else {

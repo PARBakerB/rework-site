@@ -3,6 +3,8 @@
 //axios.defaults.withCredentials = true;
 import * as fs from 'node:fs';
 
+import { fsManager } from './terminal-rework-site.js';
+
 const MFG_PARTS_FILE = './database/Manufacturer-part-numbers.csv';
 const PROD_BOMS_FILE = './database/prodboms.json';
 const PART_DESCRIPTIONS_FILE = './database/searchNames.json';
@@ -30,6 +32,7 @@ async function filterBOMArray(bomItems) {
 // GET BILL OF MATERIALS LIST FROM PRODUCTION ORDER NUMBER
 async function getBOMFromProd(prodNumber) {
     let bomItems = [];
+    //let header_file_dat = await fsManager.read(PROD_HEADERS_FILE);
 	let header_file_dat = await fs.promises.readFile(PROD_HEADERS_FILE, async function (err, data) {if (err) throw err;});
 	let header_file_json = JSON.parse(header_file_dat.toString('utf8'));
 	let assemNum = '';
