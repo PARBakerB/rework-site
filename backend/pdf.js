@@ -1,4 +1,5 @@
-import * as fs from 'node:fs';
+import constants from "./backend/constants.js"
+const fsm = constants.fsManager;
 
 import { PDFDocument, StandardFonts, rgb, degrees } from 'pdf-lib';
 import { canvasStream } from './canvas.js';
@@ -25,7 +26,8 @@ async function createPdf(data) {
 	let serialBarcode = null;
 	switch (data.label) {
 		case 'Phase 1801':
-			tm_stream = await pdfDoc.embedJpg(fs.readFileSync('./database/PAR_PHASE_TM.jpg'));
+			let jpgFile = await fsm.read('./database/PAR_PHASE_TM.jpg');
+			tm_stream = await pdfDoc.embedJpg(jpgFile);
 	}
 	const modelBarcode = await pdfDoc.embedPng(canvasStream(data.model, 1));
 

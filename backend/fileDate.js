@@ -1,5 +1,7 @@
-import * as fs from 'node:fs';
+import constants from "./backend/constants.js"
+const fsm = constants.fsManager;
 
+/*
 function fileStatsBirthTime() {
     fs.stat("./.gitignore", (error, stats) => {
         if (error) {
@@ -9,10 +11,11 @@ function fileStatsBirthTime() {
         console.log(stats.birthtime);
     });
 }
+*/
 
 export function greatestLogDate() {
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    let fileNames = fs.readdirSync("./frontend/logs");
+    let fileNames = fsm.read("./frontend/logs");
     let badFileIndex = fileNames.indexOf('loginfo.txt');
     fileNames = fileNames.slice(0, badFileIndex).concat(fileNames.slice(badFileIndex + 1, fileNames.length));
 

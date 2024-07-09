@@ -1,9 +1,5 @@
-//import * as readline from 'node:readline';
-//import axios from 'axios';
-//axios.defaults.withCredentials = true;
-import * as fs from 'node:fs';
-
 import constants from './constants.js';
+const fsm = constants.fsManager;
 
 const MFG_PARTS_FILE = './database/Manufacturer-part-numbers.csv';
 const PROD_BOMS_FILE = './database/prodboms.json';
@@ -32,14 +28,13 @@ async function filterBOMArray(bomItems) {
 // GET BILL OF MATERIALS LIST FROM PRODUCTION ORDER NUMBER
 async function getBOMFromProd(prodNumber) {
     let bomItems = [];
-    //let header_file_dat = await constants.fsManager.read(PROD_HEADERS_FILE);
-	let header_file_dat = await fs.promises.readFile(PROD_HEADERS_FILE, async function (err, data) {if (err) throw err;});
+    let header_file_dat = await fsm.read(PROD_HEADERS_FILE);
 	let header_file_json = JSON.parse(header_file_dat.toString('utf8'));
 	let assemNum = '';
 	header_file_json.forEach(j => {
 		if (j.ProductionOrderNumber === prodNumber) assemNum = j.ItemNumber;
 	});
-	let bom_file_dat = await fs.promises.readFile(PROD_BOMS_FILE, async function (err, data) {if (err) throw err;});
+	let bom_file_dat = await fsm.read(PROD_BOMS_FILE, async function (err, data) {if (err) throw err;});
 	let bom_file_json = JSON.parse(bom_file_dat.toString('utf8'));
 	bom_file_json.forEach(j => {
 		if (j.ProductionOrderNumber === prodNumber && j.BOMLineQuantity != 0) {
@@ -52,7 +47,7 @@ async function getBOMFromProd(prodNumber) {
 // RETURNS A LIST OF MANUFACTURER PART NUMBERS FOR A GIVEN PAR PART
 async function getMFG (parPart) {
 	let relevant_mfg_part_numbers = [];
-	let raw = await fs.promises.readFile(MFG_PARTS_FILE, async function (err, data) {if (err) throw err;});
+	let raw = await fsm.read(MFG_PARTS_FILE, async function (err, data) {if (err) throw err;});
 	let mfg_parts_list_split_by_line = raw.toString('utf8').split('\n');
 	mfg_parts_list_split_by_line.forEach(line => {
 		let line_par_part = line.split(';')[2];
@@ -67,7 +62,7 @@ async function getMFG (parPart) {
 // GET THE SEARCH NAME OF A PAR PART NUMBER/ ITEM NUMBER FROM RELEASEDDISTINCTPRODUCTDETAILSV2
 async function getSearchName (parPart) {
 	let searchName = "Description Not Found";
-	let raw = await fs.promises.readFile(PART_DESCRIPTIONS_FILE, async function (err, data) {if (err) throw err;});
+	let raw = await fsm.read(PART_DESCRIPTIONS_FILE, async function (err, data) {if (err) throw err;});
 	let jsonObject = JSON.parse(raw.toString('utf8'));
 	jsonObject.forEach(j => {
 		if (j['ItemNumber'] === parPart) searchName = j['SearchName'];
@@ -79,7 +74,7 @@ async function getSearchName (parPart) {
 async function getModel (modelNumber) {
     let mn = modelNumber.toUpperCase();
     try {
-        let raw = fs.promises.readFile('./ref_json/'+mn+'.json');
+        let raw = fsm.read('./ref_json/'+mn+'.json');
         return JSON.parse(await raw);
     }
     catch { return {}; }
@@ -144,7 +139,7 @@ async function createModel () {
         if (Array.isArray(model[prop]) && model[prop].length == 1 && model[prop][0] == '') {model[prop] = [];}
         if (prop == 'model') {model[prop] = model[prop].toUpperCase();}
     }
-    fs.writeFile("./ref_json/"+model.model.toUpperCase()+".json", JSON.stringify(model), (err)=>{
+    fsm.write("./ref_json/"+model.model.toUpperCase()+".json", JSON.stringify(model), (err)=>{
         if (err) throw err;
         rl.close();
     });

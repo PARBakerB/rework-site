@@ -1,14 +1,13 @@
-import * as https from 'node:https';
-//import * as http from 'node:http';
-import * as fs from 'node:fs';
+//import * as https from 'node:https';
+import * as http from 'node:http';
 import * as path from 'node:path';
 
 import { greatestLogDate } from './backend/fileDate.js';
 import { getMFG, getBOMFromProd, getSearchName } from './backend/partObjects.js';
-//import { ioManager } from './backend/ioManager.js';
 import { createPdf } from './backend/pdf.js';
 
 import constants from "./backend/constants.js"
+const fsm = constants.fsManager;
 
 process.env.TZ = 'EST5EDT';
 const PORT = 9615;
@@ -33,8 +32,8 @@ const DATABASE_PATH = path.join(process.cwd(), './database');
 const logFileName = STATIC_PATH + '/logs/' + Date().slice(0,-39).replace(/ /g, "_").replace(/:/g, "-") + '.csv';
 var lastUpdate = Date().toString().slice(4,10) + " " + Date().toString().slice(13,15) + " at " + Date().toString().slice(16,21) + " EST";
 const options = {
-	key: fs.readFileSync('./STAR_partech_com.key'),
-	cert: fs.readFileSync('./STAR_partech_com.crt')
+	//key: fsm.read('./STAR_partech_com.key'),
+	//cert: fsm.read('./STAR_partech_com.crt')
 };
 
 
@@ -46,15 +45,15 @@ const updateDatabase = async (req, res, filename) => {
 		dataObject += j.toString('utf8');
 	});
 	req.on('end', async () => {
-		let fileSoFar = (await fs.promises.readFile(DATABASE_PATH + "/" + filename)).toString('utf8');
+		let fileSoFar = (await fsm.read(DATABASE_PATH + "/" + filename)).toString('utf8');
 		// checks if this is the first post in a series
 		if (dataObject.substring(0,50).search("PROD-000000") != -1) {
-			await fs.promises.writeFile(DATABASE_PATH + "/" + filename, "[]");
+			await fsm.write(DATABASE_PATH + "/" + filename, "[]");
 		} else {
 			dataObject = dataObject.substring(1,dataObject.length);
 			fileSoFar = fileSoFar.substring(0,fileSoFar.length-1);
 			let newFile = fileSoFar === "[" ? fileSoFar + dataObject : fileSoFar + "," + dataObject;
-			await fs.promises.writeFile(DATABASE_PATH + "/" + filename, newFile);
+			await fsm.write(DATABASE_PATH + "/" + filename, newFile);
 		}
 		res.end();
 		lastUpdate = Date().toString().slice(4,10) + " " + Date().toString().slice(13,15) + " at " + Date().toString().slice(16,21);
@@ -68,27 +67,27 @@ const getResponse = async (url) => {
 		const paths = [STATIC_PATH, '/logs/', greatestLogDate()];
 		const filePath = path.join(...paths);
 		const ext = path.extname(filePath).substring(1);
-		const stream = fs.createReadStream(filePath);
+		const stream = await fsm.readStream(filePath);
 		return { found, ext, stream };
 	} else {
 		const paths = [STATIC_PATH, url];
 		if (url.endsWith('/')) paths.push('index.html');
 		const filePath = path.join(...paths);
 		const pathTraversal = !filePath.startsWith(STATIC_PATH);
-		const exists = await fs.promises.access(filePath).then(...toBool);
+		const exists = await fsm.access(filePath).then(...toBool);
 		const found = !pathTraversal && exists;
 		const streamPath = found ? filePath : STATIC_PATH + '/404.html';
 		const ext = path.extname(streamPath).substring(1).toLowerCase();
-		const stream = fs.createReadStream(streamPath);
+		const stream = await fsm.readStream(streamPath);
 		return { found, ext, stream };
 	}
 };
 const postResponse = async (req, res) => {
-	fs.appendFile(logFileName, req.url.substring(1) + '\n', function (err) {if (err) throw err;});
+	fsm.append(logFileName, req.url.substring(1) + '\n', function (err) {if (err) throw err;});
 	const found = true;
 	const ext = 'html';
 	const streamPath = [STATIC_PATH, '/', 'index.html'];
-	const stream = fs.createReadStream(path.join(...streamPath));
+	const stream = await fsm.readStream(path.join(...streamPath));
 	return { found, ext, stream };
 };
 const fileServ = async (req, res) => {
@@ -121,14 +120,10 @@ const fileServ = async (req, res) => {
 		});
 		req.on('end', async () => {
 			response = JSON.parse(response);
-			let jsonObjectsFile = await fs.promises.readFile(DATABASE_PATH+"/SavedParts.json");
+			let jsonObjectsFile = await fsm.read(DATABASE_PATH+"/SavedParts.json");
 			let jsonObjects = JSON.parse(jsonObjectsFile);
 			jsonObjects[response.fields[0]] = response;
-			fs.writeFileSync(
-				DATABASE_PATH+"/SavedParts.json",
-				JSON.stringify(jsonObjects),
-				err => {if (err) throw err;}
-			);
+			await fsm.write(DATABASE_PATH+"/SavedParts.json", JSON.stringify(jsonObjects));
 			res.writeHead(200, { 'Content-Type': 'application/json' });
 			res.write(JSON.stringify(response));
 			res.end();
@@ -140,7 +135,7 @@ const fileServ = async (req, res) => {
 		});
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': 'application/json' });
-			let jsonObjectsFile = await fs.promises.readFile(DATABASE_PATH+"/SavedParts.json");
+			let jsonObjectsFile = await fsm.read(DATABASE_PATH+"/SavedParts.json");
 			let jsonObjects = JSON.parse(jsonObjectsFile);
 			if (JSON.stringify(jsonObjects[response]) != undefined) res.write(JSON.stringify(jsonObjects[response]));
 			else res.write("undefined");
@@ -165,8 +160,8 @@ const fileServ = async (req, res) => {
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': MIME_TYPES['pdf'] });
 			let pdfData = await createPdf(response);
-			await fs.promises.writeFile('./frontend/print.pdf', pdfData);
-			res.write("print.pdf")
+			await fsm.write('./frontend/print.pdf', pdfData);
+			res.write("print.pdf");
 			res.end();
 		});
 	} else if (req.url === "/PROD-BOM-UPDATE") {
@@ -188,7 +183,7 @@ const fileServ = async (req, res) => {
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': MIME_TYPES['pdf'] });
 			let pdfData = await createPdf(response);
-			await fs.promises.writeFile('./frontend/cycle.pdf', pdfData);
+			await fsm.write('./frontend/cycle.pdf', pdfData);
 			res.write("cycle.pdf");
 			res.end();
 		});
@@ -200,7 +195,7 @@ const fileServ = async (req, res) => {
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': MIME_TYPES['pdf'] });
 			let pdfData = await createPdf(response);
-			await fs.promises.writeFile('./frontend/SRL.pdf', pdfData);
+			await fsm.write('./frontend/SRL.pdf', pdfData);
 			res.write("SRL.pdf");
 			res.end();
 		});
@@ -211,7 +206,10 @@ const fileServ = async (req, res) => {
 		});
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
-			await constants.fsManager.write('./frontend/LoadLog.csv', response);
+			await fsm.write('./frontend/LoadLog.csv', response);
+			let log = await fsm.read('./frontend/LoadLog.csv');
+			console.log(log.toString());
+			res.write(log);
 			res.end();
 		});
 	} else {
@@ -224,7 +222,7 @@ const fileServ = async (req, res) => {
 	}
 };
 
-https.createServer(options, fileServ).listen(PORT);
+//https.createServer(options, fileServ).listen(PORT);
 
-//http.createServer(fileServ).listen(PORT);
+http.createServer(fileServ).listen(PORT);
 //console.log(`Server running at https://127.0.0.1:${PORT}/`);
