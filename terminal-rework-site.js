@@ -5,14 +5,11 @@ import * as path from 'node:path';
 
 import { greatestLogDate } from './backend/fileDate.js';
 import { getMFG, getBOMFromProd, getSearchName } from './backend/partObjects.js';
-import { ioManager } from './backend/ioManager.js';
+//import { ioManager } from './backend/ioManager.js';
 import { createPdf } from './backend/pdf.js';
 
-const fsManager = new ioManager();
+import constants from "./backend/constants.js"
 
-export default {
-	fsManager
-}
 process.env.TZ = 'EST5EDT';
 const PORT = 9615;
 const MIME_TYPES = {
@@ -214,7 +211,7 @@ const fileServ = async (req, res) => {
 		});
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
-			await fsManager.write('./frontend/LoadLog.csv', response);
+			await constants.fsManager.write('./frontend/LoadLog.csv', response);
 			res.end();
 		});
 	} else {
