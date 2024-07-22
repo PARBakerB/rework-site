@@ -4,32 +4,44 @@ class ioManager {
     constructor () {
         this._queueMap = new Map();
     }
+    // public methods
     append (filename, writeData = '') {
         let fileIoData = { name: filename, data: writeData };
         let fileAction = ({name, data}) => () => new Promise(resolve => resolve(fs.promises.appendFile(name, data)));
-        return this.enqueueFileIo(fileIoData, fileAction);
+        return this.#enqueueFileIo(fileIoData, fileAction);
     }
     write (filename, writeData = '') {
         let fileIoData = { name: filename, data: writeData };
         let fileAction = ({name, data}) => () => new Promise(resolve => resolve(fs.promises.writeFile(name, data)));
-        return this.enqueueFileIo(fileIoData, fileAction);
+        return this.#enqueueFileIo(fileIoData, fileAction);
     }
     read (filename) {
         let fileIoData = { name: filename };
         let fileAction = ({name}) => () => new Promise(resolve => resolve(fs.promises.readFile(name)));
-        return this.enqueueFileIo(fileIoData, fileAction);
+        return this.#enqueueFileIo(fileIoData, fileAction);
     }
     readStream (filename) {
         let fileIoData = { name: filename };
         let fileAction = ({name}) => () => new Promise(resolve => resolve(fs.createReadStream(name)));
-        return this.enqueueFileIo(fileIoData, fileAction);
+        return this.#enqueueFileIo(fileIoData, fileAction);
+    }
+    readSync (filename) {
+        let fileIoData = { name: filename };
+        let fileAction = ({name}) => () => new Promise(resolve => resolve(fs.readFileSync(name)));
+        return this.#enqueueFileIo(fileIoData, fileAction);
+    }
+    readdir (filename) {
+        let fileIoData = { name: filename };
+        let fileAction = ({name}) => () => new Promise(resolve => resolve(fs.promises.readdir(name)));
+        return this.#enqueueFileIo(fileIoData, fileAction);
     }
     access (filename) {
         let fileIoData = { name: filename };
         let fileAction = ({name}) => () => new Promise(resolve => resolve(fs.promises.access(name)));
-        return this.enqueueFileIo(fileIoData, fileAction);
+        return this.#enqueueFileIo(fileIoData, fileAction);
     }
-    enqueueFileIo (fileIoData, fileAction) {
+    // private functions
+    #enqueueFileIo (fileIoData, fileAction) {
         if (this._queueMap.get(fileIoData.name)) {
             return this._queueMap.get(fileIoData.name).enqueue(fileAction(fileIoData));
         } else {

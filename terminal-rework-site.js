@@ -1,8 +1,8 @@
-//import * as https from 'node:https';
-import * as http from 'node:http';
+import * as https from 'node:https';
+//import * as http from 'node:http';
 import * as path from 'node:path';
 
-import { greatestLogDate } from './backend/fileDate.js';
+import { combineLogs } from './backend/fileDate.js';
 import { getMFG, getBOMFromProd, getSearchName } from './backend/partObjects.js';
 import { createPdf } from './backend/pdf.js';
 
@@ -29,13 +29,14 @@ const MIME_TYPES = {
 };
 const STATIC_PATH = path.join(process.cwd(), './frontend');
 const DATABASE_PATH = path.join(process.cwd(), './database');
-const logFileName = STATIC_PATH + '/logs/' + Date().slice(0,-39).replace(/ /g, "_").replace(/:/g, "-") + '.csv';
+const logFileName = STATIC_PATH + '/logs/rework_' + Date().slice(0,-39).replace(/ /g, "_").replace(/:/g, "-") + '.csv';
 var lastUpdate = Date().toString().slice(4,10) + " " + Date().toString().slice(13,15) + " at " + Date().toString().slice(16,21) + " EST";
-const options = {
-	//key: fsm.read('./STAR_partech_com.key'),
-	//cert: fsm.read('./STAR_partech_com.crt')
-};
 
+const options = {};
+(async () => {
+	options.key = await fsm.read('./STAR_partech_com.key');
+	options.cert = await fsm.read('./STAR_partech_com.crt')
+})
 
 const toBool = [() => true, () => false];
 
@@ -63,8 +64,9 @@ const updateDatabase = async (req, res, filename) => {
 
 const getResponse = async (url) => {
 	if (url.endsWith('log.csv')) {
+		await combineLogs();
 		const found = true;
-		const paths = [STATIC_PATH, '/logs/', greatestLogDate()];
+		const paths = [STATIC_PATH, '/logs/', 'Rework_Log_Combined.csv'];
 		const filePath = path.join(...paths);
 		const ext = path.extname(filePath).substring(1);
 		const stream = await fsm.readStream(filePath);
@@ -208,7 +210,6 @@ const fileServ = async (req, res) => {
 			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
 			await fsm.write('./frontend/LoadLog.csv', response);
 			let log = await fsm.read('./frontend/LoadLog.csv');
-			console.log(log.toString());
 			res.write(log);
 			res.end();
 		});
@@ -222,7 +223,7 @@ const fileServ = async (req, res) => {
 	}
 };
 
-//https.createServer(options, fileServ).listen(PORT);
+https.createServer(options, fileServ).listen(PORT);
 
-http.createServer(fileServ).listen(PORT);
+//http.createServer(fileServ).listen(PORT);
 //console.log(`Server running at https://127.0.0.1:${PORT}/`);
