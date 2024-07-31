@@ -13,6 +13,10 @@
 	<label>Location:<input type="text" class="inputs" id="loc"></label>
 	<br>
 	<label>Initials:<input type="text" class="inputs" id="ini"></label>
+    <br>
+	<label>Model:<input type="text" class="inputs" id="model"></label>
+    <br>
+	<label>Serial:<input type="text" class="inputs" id="serial"></label>
 	<br>
 	<input id="printButton" type="button" value="Submit">
 	<br>
@@ -24,6 +28,8 @@ function sendDocument() {
     let pr = document.getElementById("pr#").value;
 	let loc = document.getElementById("loc").value;
 	let ini = document.getElementById("ini").value;
+    let model = document.getElementById("model").value;
+    let serial = document.getElementById("serial").value;
 
     //Create a print document
     var request = '<epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">';
@@ -32,6 +38,8 @@ function sendDocument() {
     request += '<text lang="en" smooth="true"/>';
     request += '<text font="font_a" rotate="0" width="3" height="3"/>';
     request += '<text>PR' + pr + '  ' + ini +'&#10;</text>';
+    request += '<text>' + model + '&#10;</text>';
+    request += '<text>' + serial + '&#10;</text>';
     request += '<text>' + loc + '&#10;</text>';
     request += '<text>' + Date().slice(4, 15) + '&#10;</text>';
     
