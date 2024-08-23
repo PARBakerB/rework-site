@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>PAR Wave Touch FW</title>
+	<style>
+		.GOOD {
+			color: GREEN;
+		}
+		.BAD {
+			color: RED;
+		}
+		.UNKNOWN {
+			color: BLUE;
+		}
+		.section-container {
+			text-align: center;
+  			border-style: solid;
+			border-color: black;
+			border-radius: 3px;
+			border-width: var(--default-border-width);
+			margin: 15px;
+			padding: 10px;
+			width: fit-content;
+		}
+	</style>
+</head>
+
+<body>
+<div class="section-container">
+	<br>
+	<label>Serial:<input type="text" id="serial"></label>
+	<br><br>
+	<input id="searchButton" type="button" value="Search">
+	<br><br>
+</div>
+<div id="results" class="section-container">
+	<ul id="searchedSerials"></ul>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script type="module" src="WaveSerialSearch.js"></script>

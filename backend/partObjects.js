@@ -1,10 +1,13 @@
 import constants from './constants.js';
 const fsm = constants.fsManager;
 
+import { dateConverter } from './fileDate.js';
+
 const MFG_PARTS_FILE = './database/Manufacturer-part-numbers.csv';
 const PROD_BOMS_FILE = './database/prodboms.json';
 const PART_DESCRIPTIONS_FILE = './database/searchNames.json';
 const PROD_HEADERS_FILE = './database/prodheaders.json';
+const LOAD_LOG_FILE = './database/LoadLog.csv';
 
 const BAD_BOM_ITEMS = ['754*', '755*', '893*', '713*', '772*', '850*', '262*', 'F*', 'CS*', 'SS*'];
 
@@ -80,6 +83,22 @@ async function getModel (modelNumber) {
     catch { return {}; }
 }
 
+// RETURN STRING "GOOD", "BAD", or "N/A" BASED ON LOAD DATE OF PAR WAVE SERIAL
+async function waveSerialSearch (serial) {
+    let loadLog = (await fsm.read(LOAD_LOG_FILE)).toString('utf8');
+    let mostRecent = 0;
+    let goodDate = dateConverter("08/21/2024");
+    loadLog.forEach(loadLogEntry => {
+        loadLogEntry = loadLogEntry.split(',');
+        if (loadLogEntry[1].includes(serial) && (dateConverter(loadLogEntry[3]) > mostRecent)) {
+            mostRecent = dateConverter(loadLogEntry[3]);
+        }
+    });
+    if (mostRecent < 2024 * 10000) {return "N/A"}
+    if (mostRecent > goodDate) return "GOOD";
+    else return "BAD";
+}
+
 // COMPARES TERMINAL JS OBJECT WITH GENERIC MODEL JS OBJECT, RETURNS DIFFERING PROPERTIES
 function compareModels (termObj, modelNumber) {
     let retVal = {};
@@ -149,4 +168,4 @@ async function createModel () {
     });
 }
 
-export { getMFG, getModel, compareModels, getBOMFromProd, getSearchName }
+export { getMFG, getModel, compareModels, getBOMFromProd, getSearchName, waveSerialSearch }

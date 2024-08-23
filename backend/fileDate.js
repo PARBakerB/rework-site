@@ -3,6 +3,14 @@ const fsm = constants.fsManager;
 
 const LOGPATH = "./frontend/logs/";
 
+function dateConverter (date) {
+    let dateArray = date.slice();
+    let monthValue = dateArray[0] * 100;
+    let dayValue = dateArray[1];
+    let yearValue = dateArray[2] * 10000;
+    return monthValue + dayValue + yearValue;
+}
+
 async function orderedLogFiles() {
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     let fileNames = await fsm.readdir(LOGPATH);
@@ -44,7 +52,7 @@ async function orderedLogFiles() {
     return sortedNameArray;
 }
 
-export async function combineLogs() {
+async function combineLogs() {
     let logList = await orderedLogFiles();
     let clp = LOGPATH + "Rework_Log_Combined.csv";
     fsm.write(clp);
@@ -53,7 +61,7 @@ export async function combineLogs() {
     }
 }
 
-export function commonFormatDate() {
+function commonFormatDate() {
     let today = Date().toString().slice(4,15);
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     for ( let month of months) {
@@ -62,3 +70,5 @@ export function commonFormatDate() {
     today = today.replace(/\s/g, "/");
     return today;
 }
+
+export { dateConverter, combineLogs, commonFormatDate }

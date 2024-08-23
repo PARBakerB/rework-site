@@ -4,7 +4,7 @@
   "description": "TS-2760 NODE JS TERMINAL RECONFIGURATION SITE",
   "main": "terminal-rework-site.js",
   "scripts": {
-    "start": "node terminal-rework-site.js"
+    "start": "nohup node terminal-rework-site.js &"
   },
   "keywords": [],
   "author": "Brett Baker",

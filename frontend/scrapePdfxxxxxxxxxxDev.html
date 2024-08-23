@@ -1,0 +1,124 @@
+<!--- REFERENCES FOR THIS PROJECT
+
+https://superuser.com/questions/1657594/a-webserver-as-a-printer
+https://github.com/watson/ipp-printer
+
+-->
+
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PR Label Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+</head>
+<body>
+    <label>Initials:<input type="text" class="inputs" id="ini"></label>
+    <br>
+    <br>
+    <input type="file" id="fileInput" accept="application/pdf">
+    <p id="output"></p>
+    <script>
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file.type !== 'application/pdf') {
+        alert('Please upload a packing slip PDF.');
+        return;
+    }
+    var model = '';
+    var loc = '';
+    var prnum = '';
+    var serial = '';
+    const reader = new FileReader();
+    reader.onload = function() {
+        const typedarray = new Uint8Array(this.result);
+
+        pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+            const maxPages = pdf.numPages;
+            const countPromises = [];
+
+            for (let i = 1; i <= maxPages; i++) {
+                countPromises.push(pdf.getPage(i).then(function(page) {
+                    return page.getTextContent().then(function(textContent) {
+                        return textContent.items.map(item => item.str).join(' ');
+                    });
+                }));
+            }
+
+            Promise.all(countPromises).then(function(texts) {
+                const fullText = texts.join(' ');
+		const nl = "\n"
+
+        let ini = document.getElementById("ini").value;
+
+        model = fullText.substring(fullText.indexOf("Remain")+7,fullText.indexOf("Location")).replace(/\s+/g, '');
+		loc = fullText.substring(fullText.indexOf("Location")+10, fullText.indexOf("Location")+22);//.replace(/\s+/g, '');
+		prnum = fullText.substring(fullText.indexOf("Organization number")+20,fullText.indexOf("Organization number")+30).replace(/\s+/g, '');
+        serial = fullText.substring(fullText.indexOf(loc)+12,fullText.indexOf(loc)+25).replace(/\s+/g, '');
+        let indexOfSpace = fullText.indexOf(loc)+ 12 + fullText.substring(fullText.indexOf(loc)+12,fullText.indexOf(loc)+25).indexOf(' ');
+        serial = fullText.substring(fullText.indexOf(loc)+12, indexOfSpace).replace(/\s+/g, '');
+		document.getElementById('output').innerText = "PR" + prnum + "  " + ini + nl + model + nl + serial + nl + loc + nl + Date().slice(4, 15) + nl + nl + fullText;
+            
+		
+
+	//Create a print document
+    var request = '<epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">';
+
+    //text output
+    request += '<text lang="en" smooth="true"/>';
+    request += '<text font="font_a" rotate="0" width="3" height="3"/>';
+    request += '<text>PR' + prnum + '  ' + ini +'&#10;</text>';
+    request += '<text>' + model + '&#10;</text>';
+    request += '<text>' + serial + '&#10;</text>';
+    request += '<text>' + loc + '&#10;</text>';
+    request += '<text>' + Date().slice(4, 15) + '&#10;</text>';
+    
+    // image output
+    //request += '<image width="8" height="8">//////////8=</image>'
+    //for (let x=0; x<3; x++) {
+    //    request += '<image width="8" height="48">8PDw8A8PDw/w8PDwDw8PD/Dw8PAPDw8P8PDw8A8PDw/w8PDwDw8PD/Dw8PAPDw8P</image>';
+    //}
+    //request += '<feed />';
+
+    // cut after print
+    request += '<cut type="feed"/>';
+    request += '</epos-print>';
+    //Create a SOAP envelop
+    var soap = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">' + '<s:Body>' + request + '</s:Body></s:Envelope>';
+    //Create an XMLHttpRequest object
+    var xhr = new XMLHttpRequest();
+    //Set the end point address, repla
+    let printerIP = '192.168.1.150';
+    var url = 'https://' + printerIP + '/cgi-bin/epos/service.cgi?devid=local_printer&timeout=10000';
+    //Open an XMLHttpRequest object
+    xhr.open('POST', url, true);
+    //<Header settings>
+    xhr.setRequestHeader('Content-Type', 'text/xml; charset=utf-8');
+    xhr.setRequestHeader('If-Modified-Since', 'Thu, 01 Jan 1970 00:00:00 GMT');
+    xhr.setRequestHeader('SOAPAction', '""');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+                //Obtain the response root element
+                var res = xhr.responseXML;
+                var success = res.getElementsByTagName('response')[0].getAttribute('success');
+                //When the printing is not successful, display a message
+                if (!/^(1|true)$/.test(success)) {
+                    alert( 'A print error occurred');
+                }
+            }
+        }
+    }
+    // Send print document
+    xhr.send(soap);
+
+	    });
+        });
+    };
+    reader.readAsArrayBuffer(file);
+       });
+    </script>
+</body>
+</html>

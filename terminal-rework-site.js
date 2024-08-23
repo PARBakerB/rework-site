@@ -1,9 +1,10 @@
 import * as https from 'node:https';
 //import * as http from 'node:http';
 import * as path from 'node:path';
+import * as fs from 'node:fs';
 
 import { combineLogs } from './backend/fileDate.js';
-import { getMFG, getBOMFromProd, getSearchName } from './backend/partObjects.js';
+import { getMFG, getBOMFromProd, getSearchName, waveSerialSearch } from './backend/partObjects.js';
 import { createPdf } from './backend/pdf.js';
 
 import constants from "./backend/constants.js"
@@ -32,11 +33,10 @@ const DATABASE_PATH = path.join(process.cwd(), './database');
 const logFileName = STATIC_PATH + '/logs/rework_' + Date().slice(0,-39).replace(/ /g, "_").replace(/:/g, "-") + '.csv';
 var lastUpdate = Date().toString().slice(4,10) + " " + Date().toString().slice(13,15) + " at " + Date().toString().slice(16,21) + " EST";
 
-const options = {};
-(async () => {
-	options.key = await fsm.read('./STAR_partech_com.key');
-	options.cert = await fsm.read('./STAR_partech_com.crt')
-})
+const options = {
+	key: fs.readFileSync('./STAR_partech_com.key'),
+	cert: fs.readFileSync('./STAR_partech_com.crt')
+};
 
 const toBool = [() => true, () => false];
 
@@ -208,9 +208,20 @@ const fileServ = async (req, res) => {
 		});
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
-			await fsm.write('./frontend/LoadLog.csv', response);
-			let log = await fsm.read('./frontend/LoadLog.csv');
+			await fsm.write('./database/LoadLog.csv', response);
+			let log = await fsm.read('./database/LoadLog.csv');
 			res.write(log);
+			res.end();
+		});
+	} else if (req.url == 'PARWaveSerialSearch') {
+		let inputData = "";
+		req.on('data', async reqData => {
+			inputData = reqData.toString('utf8');
+		});
+		req.on('end', async () => {
+			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+			let resData = await waveSerialSearch(inputData);
+			res.write(resData);
 			res.end();
 		});
 	} else {
