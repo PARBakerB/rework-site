@@ -5,7 +5,7 @@ const searchSerial = async () => {
     let serial = document.getElementById("serial").value;
     
     let response = (await axios ({
-        method: 'get',
+        method: 'post',
         url: 'PARWaveSerialSearch',
         data: serial
     })).data;

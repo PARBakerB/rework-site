@@ -4,9 +4,9 @@ const fsm = constants.fsManager;
 const LOGPATH = "./frontend/logs/";
 
 function dateConverter (date) {
-    let dateArray = date.slice();
+    let dateArray = date.split("/");
     let monthValue = dateArray[0] * 100;
-    let dayValue = dateArray[1];
+    let dayValue = dateArray[1] * 1;
     let yearValue = dateArray[2] * 10000;
     return monthValue + dayValue + yearValue;
 }

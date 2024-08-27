@@ -85,16 +85,18 @@ async function getModel (modelNumber) {
 
 // RETURN STRING "GOOD", "BAD", or "N/A" BASED ON LOAD DATE OF PAR WAVE SERIAL
 async function waveSerialSearch (serial) {
-    let loadLog = (await fsm.read(LOAD_LOG_FILE)).toString('utf8');
+    let loadLogRaw = await fsm.read(LOAD_LOG_FILE);
+    let loadLog = loadLogRaw.toString('utf8').split("\r\n");
     let mostRecent = 0;
     let goodDate = dateConverter("08/21/2024");
     loadLog.forEach(loadLogEntry => {
         loadLogEntry = loadLogEntry.split(',');
+        loadLogEntry = loadLogEntry[0] === '' ? ["0","0","0","0"]: loadLogEntry;
         if (loadLogEntry[1].includes(serial) && (dateConverter(loadLogEntry[3]) > mostRecent)) {
             mostRecent = dateConverter(loadLogEntry[3]);
         }
     });
-    if (mostRecent < 2024 * 10000) {return "N/A"}
+    if (mostRecent < 2024 * 10000) return "N/A";
     if (mostRecent > goodDate) return "GOOD";
     else return "BAD";
 }

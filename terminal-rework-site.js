@@ -1,5 +1,5 @@
 import * as https from 'node:https';
-//import * as http from 'node:http';
+import * as http from 'node:http';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 
@@ -32,11 +32,6 @@ const STATIC_PATH = path.join(process.cwd(), './frontend');
 const DATABASE_PATH = path.join(process.cwd(), './database');
 const logFileName = STATIC_PATH + '/logs/rework_' + Date().slice(0,-39).replace(/ /g, "_").replace(/:/g, "-") + '.csv';
 var lastUpdate = Date().toString().slice(4,10) + " " + Date().toString().slice(13,15) + " at " + Date().toString().slice(16,21) + " EST";
-
-const options = {
-	key: fs.readFileSync('./STAR_partech_com.key'),
-	cert: fs.readFileSync('./STAR_partech_com.crt')
-};
 
 const toBool = [() => true, () => false];
 
@@ -208,12 +203,12 @@ const fileServ = async (req, res) => {
 		});
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
-			await fsm.write('./database/LoadLog.csv', response);
-			let log = await fsm.read('./database/LoadLog.csv');
-			res.write(log);
+			await fsm.append('./database/LoadLog.csv', response);
+			//let log = await fsm.read('./database/LoadLog.csv');
+			res.write("Log Received");
 			res.end();
 		});
-	} else if (req.url == 'PARWaveSerialSearch') {
+	} else if (req.url == '/PARWaveSerialSearch') {
 		let inputData = "";
 		req.on('data', async reqData => {
 			inputData = reqData.toString('utf8');
@@ -221,6 +216,7 @@ const fileServ = async (req, res) => {
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
 			let resData = await waveSerialSearch(inputData);
+			console.log(resData);
 			res.write(resData);
 			res.end();
 		});
@@ -234,7 +230,15 @@ const fileServ = async (req, res) => {
 	}
 };
 
-https.createServer(options, fileServ).listen(PORT);
-
-//http.createServer(fileServ).listen(PORT);
-//console.log(`Server running at https://127.0.0.1:${PORT}/`);
+try {
+	const options = {
+		key: fs.readFileSync('./STAR_partech_com.key'),
+		cert: fs.readFileSync('./STAR_partech_com.crt')
+	};
+	https.createServer(options, fileServ).listen(PORT);
+	console.log("Server running at https://172.17.17.248:" + PORT + "/");
+}
+catch {
+	http.createServer(fileServ).listen(PORT);
+	console.log("Server running at http://172.17.17.248:" + PORT + "/");
+}
