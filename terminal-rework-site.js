@@ -203,7 +203,7 @@ const fileServ = async (req, res) => {
 		});
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
-			await fsm.append('./database/LoadLog.csv', response);
+			await fsm.append('./database/LoadLog.csv', response + '\r\n');
 			//let log = await fsm.read('./database/LoadLog.csv');
 			res.write("Log Received");
 			res.end();
@@ -216,7 +216,6 @@ const fileServ = async (req, res) => {
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
 			let resData = await waveSerialSearch(inputData);
-			console.log(resData);
 			res.write(resData);
 			res.end();
 		});

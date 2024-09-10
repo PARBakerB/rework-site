@@ -8,6 +8,7 @@ const PROD_BOMS_FILE = './database/prodboms.json';
 const PART_DESCRIPTIONS_FILE = './database/searchNames.json';
 const PROD_HEADERS_FILE = './database/prodheaders.json';
 const LOAD_LOG_FILE = './database/LoadLog.csv';
+const FW_LOG_FILE = './database/PARWaveNoSW.csv';
 
 const BAD_BOM_ITEMS = ['754*', '755*', '893*', '713*', '772*', '850*', '262*', 'F*', 'CS*', 'SS*'];
 
@@ -86,6 +87,7 @@ async function getModel (modelNumber) {
 // RETURN STRING "GOOD", "BAD", or "N/A" BASED ON LOAD DATE OF PAR WAVE SERIAL
 async function waveSerialSearch (serial) {
     let loadLogRaw = await fsm.read(LOAD_LOG_FILE);
+    let response = "N/A";
     let loadLog = loadLogRaw.toString('utf8').split("\r\n");
     let mostRecent = 0;
     let goodDate = dateConverter("08/21/2024");
@@ -96,9 +98,22 @@ async function waveSerialSearch (serial) {
             mostRecent = dateConverter(loadLogEntry[3]);
         }
     });
-    if (mostRecent < 2024 * 10000) return "N/A";
-    if (mostRecent > goodDate) return "GOOD";
-    else return "BAD";
+    if (mostRecent > goodDate) response = "GOOD";
+    else response = "BAD";
+    if (mostRecent < dateConverter("12/12/2023")) response = "N/A";
+    if (response === "N/A" || response === "BAD") {
+        let noLoadLogRaw = await fsm.read(FW_LOG_FILE);
+        let noLoadLog = noLoadLogRaw.toString('utf8').split("\r\n");
+        let goodOrBad = new Array(noLoadLog.length);
+        for (let line = 0; line < noLoadLog.length; line ++) {
+            noLoadLog[line] = noLoadLog[line].split(",")[0];
+            goodOrBad[line] = 1 * (noLoadLog[line].split(",")[4]);
+        }
+        let serialIndex = noLoadLog.indexOf(serial);
+        if (serialIndex >= 0 && goodOrBad[serialIndex]) response = "GOOD";
+        if (serialIndex >= 0 && !(goodOrBad[serialIndex])) response = "BAD";
+    }
+    return response;
 }
 
 // COMPARES TERMINAL JS OBJECT WITH GENERIC MODEL JS OBJECT, RETURNS DIFFERING PROPERTIES
