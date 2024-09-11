@@ -106,8 +106,8 @@ async function waveSerialSearch (serial) {
         let noLoadLog = noLoadLogRaw.toString('utf8').split("\r\n");
         let goodOrBad = new Array(noLoadLog.length);
         for (let line = 0; line < noLoadLog.length; line ++) {
-            noLoadLog[line] = noLoadLog[line].split(",")[0];
             goodOrBad[line] = 1 * (noLoadLog[line].split(",")[4]);
+            noLoadLog[line] = noLoadLog[line].split(",")[0];
         }
         let serialIndex = noLoadLog.indexOf(serial);
         if (serialIndex >= 0 && goodOrBad[serialIndex]) response = "GOOD";

@@ -32,20 +32,21 @@
 		}
 	</style>
 </head>
-
 <body>
-<h2 style="color: rgb(167, 17, 37)">Enter a serial number in the below field to verify the touch controller firmware has been updated to the latest version.</h2>
 <div class="section-container">
-	<br>
-	<label>Serial:<input type="text" id="findSerial"></label>
+    <br><br>
+	<label>Serial:<input type="text" id="logSerial"></label>
 	<br><br>
-	<input id="searchButton" type="button" value="Search">
+	<input id="logButton" type="button" value="Log">
 	<br><br>
 </div>
 <div id="results" class="section-container hide">
-	<ul id="searchedSerials"></ul>
+	<p>The following serials will be logged:</p>
+	<ul id="loggedSerials"></ul>
+	<p>Would you like to proceed?</p>
+	<input id="confirmButton" type="button" value="Confirm"><input id="cancelButton" type="button" value="Cancel">
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script type="module" src="WaveSerialSearch.js"></script>
+<script type="module" src="WaveFirmwareLog.js"></script>
 </body>

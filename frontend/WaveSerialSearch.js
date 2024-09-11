@@ -1,29 +1,28 @@
-let resultContainer = document.getElementById('results');
-resultContainer.style.visibility = 'hidden';
+const RESULTCONTAINER = document.getElementById('results');
+
+const SEARCHED_SERIALS = document.getElementById('searchedSerials');
 
 const searchSerial = async () => {
-    let serial = document.getElementById("serial").value;
+    let findSerial = document.getElementById("findSerial").value;
+    document.getElementById("findSerial").value = "";
+    findSerial = findSerial.split(/\s+/);
     
-    let response = (await axios ({
-        method: 'post',
-        url: 'PARWaveSerialSearch',
-        data: serial
-    })).data;
-
-    let newListItem = '';
-    if (response === "GOOD") {
-        newListItem = "<li class='GOOD'>" + serial + ":\t" + response + "</li>"
-    } else if (response === "BAD") {
-        newListItem = "<li class='BAD'>" + serial + ":\t" + response + "</li>"
-    }
-    else {
-        newListItem = "<li class='UNKNOWN'>" + serial + ":\t" + "Not Found" + "</li>"
-    }
-    document.getElementById('searchedSerials').innerHTML += newListItem;
-    resultContainer.style.visibility = 'visible';
+    findSerial.forEach(async serial => {
+        let response = (await axios ({
+            method: 'post',
+            url: 'PARWaveSerialSearch',
+            data: serial
+        })).data;
+        let serialLi = document.createElement("li");
+        if (response === "N/A") {serialLi.classList += "UNKNOWN";} else {serialLi.classList += response;}
+        response = response === "N/A" ? "Not Found" : response;
+        serialLi.textContent = serial + ":\t" + response;
+        SEARCHED_SERIALS.appendChild(serialLi);
+    });
+    
+    RESULTCONTAINER.style.display = 'block';
 }
-
-document.getElementById('serial').addEventListener('keypress', (e)=>{
+document.getElementById('findSerial').addEventListener('keypress', (e)=>{
     if (e.key !== "Enter") return;
     searchSerial();
 });

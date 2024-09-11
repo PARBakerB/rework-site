@@ -219,6 +219,21 @@ const fileServ = async (req, res) => {
 			res.write(resData);
 			res.end();
 		});
+	} else if (req.url == '/PARWaveFirmwareLog') {
+		let inputData = "";
+		req.on('data', async reqData => {
+			inputData = JSON.parse(reqData.toString('utf8'));
+		});
+		req.on('end', async () => {
+			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+			inputData.forEach(serial => {
+				let logString = serial + ",,,,1";
+				console.log(logString);
+				fsm.append('./database/PARWaveNoSW.csv', logString + '\r\n');
+			});
+			res.write("Serials Logged Successfully");
+			res.end();
+		});
 	} else {
 		const file = req.method === 'POST' ? await postResponse(req, res) : await getResponse(req.url);
 		const statusCode = file.found ? 200 : 404;
