@@ -222,16 +222,21 @@ const fileServ = async (req, res) => {
 	} else if (req.url == '/PARWaveFirmwareLog') {
 		let inputData = "";
 		req.on('data', async reqData => {
-			inputData = JSON.parse(reqData.toString('utf8'));
+			try {inputData += JSON.parse(reqData.toString('utf8'));}
+			catch (e) { inputData = reqData.toString('utf8'); } 
 		});
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
-			inputData.forEach(serial => {
-				let logString = serial + ",,,,1";
-				console.log(logString);
+			if (Array.isArray(inputData)) {
+				inputData.forEach(serial => {
+					let logString = serial + ",,,,1";
+					fsm.append('./database/PARWaveNoSW.csv', logString + '\r\n');
+				});
+			} else {
+				let logString = inputData + ",,,,1";
 				fsm.append('./database/PARWaveNoSW.csv', logString + '\r\n');
-			});
-			res.write("Serials Logged Successfully");
+			}
+			res.write("Log Received");
 			res.end();
 		});
 	} else {
