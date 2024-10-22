@@ -41,6 +41,19 @@ function updateVariableElements() {
 	reworkParts = document.getElementsByClassName("rw-part");
 }
 
+// function for visibility to the indexes previously used before date was removed
+function qtyInputNoDateAdjustment(previous) {return previous < 6 ? previous : previous - 1}
+
+function commonFormatDate() {
+	let today = Date().toString().slice(4,15);
+	const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+	for ( let month of months) {
+		if (today.includes(month)) {today = (months.indexOf(month)+1) + today.slice(3,today.length);}
+	}
+	today = today.replace(/\s/g, "/");
+	return today;
+}
+
 // TAKES DOM ELEMENT OR DOM ELEMENT ARRAY WITH HIDE OR SHOW CLASS AND SWAPS THEM OUT
 // ONLY WORKS ON ELEMENTS WITH VISIBILITY CLASS 'hide' OR 'show'
 function toggleVisibility(domObject, value) {
@@ -135,8 +148,8 @@ function getUpdateTime() {
 
 // FORM SUBMISSION USING SUBMIT BUTTON
 function postInputs() {
-	let qty1 = qtyInput.elements[1].value !== "" ? parseInt(qtyInput.elements[1].value) : 0;
-	let qty2 = qtyInput.elements[2].value !== "" ? parseInt(qtyInput.elements[2].value) : 0;
+	let qty1 = qtyInput.elements[qtyInputNoDateAdjustment(1)].value !== "" ? parseInt(qtyInput.elements[qtyInputNoDateAdjustment(1)].value) : 0;
+	let qty2 = qtyInput.elements[qtyInputNoDateAdjustment(2)].value !== "" ? parseInt(qtyInput.elements[qtyInputNoDateAdjustment(2)].value) : 0;
 	let partQty = [qty1, qty2];
 	let arraysize = partQty[1]>partQty[0] ? partQty[1]*5*2 : (partQty[0]*5*2)-5;
 	let rwDataQty = arraysize + 2 >= 0 ? arraysize + 2 : 0;
@@ -158,9 +171,11 @@ function postInputs() {
 	});
 	if ( i === 0 ) { rwdata[1] = notesInput.value; } else { rwdata[i] = notesInput.value; }
 	notesInput.value = '';
-	let statarray = [qtyInput.elements[0].value,qtyInput.elements[5].value,qtyInput.elements[3].value,
-		qtyInput.elements[4].value,rwdata[0],qtyInput.elements[6].value, 
-		qtyInput.elements[7].value,qtyInput.elements[8].value
+	// REPLACED qtyInput.elements[5].value WITH AN AUTOFILLED DATE FROM Date(), adjusted higher inputs by -1
+	let statarray = [qtyInput.elements[qtyInputNoDateAdjustment(0)].value,commonFormatDate(),//qtyInput.elements[5].value,
+		qtyInput.elements[qtyInputNoDateAdjustment(3)].value,
+		qtyInput.elements[qtyInputNoDateAdjustment(4)].value,rwdata[0],qtyInput.elements[qtyInputNoDateAdjustment(6)].value, 
+		qtyInput.elements[qtyInputNoDateAdjustment(7)].value,qtyInput.elements[qtyInputNoDateAdjustment(8)].value
 	];
 	postRework(statarray.concat(rwdata.slice(1)));
 }
@@ -218,13 +233,13 @@ async function qtyUpdate(event) {
 	if (event.key==="Enter" || event.target == null) {
 		if (index <= 7 && event.target != null) {
 			qtyInput.elements[index + 1].focus();
-		} else if (event.target == null) {qtyInput.elements[5].focus();}
+		} else if (event.target == null) {qtyInput.elements[qtyInputNoDateAdjustment(5)].focus();}
 		else {input.elements[0].focus();}
 		let isQty = [1, 2].includes(index) || event.target == null;
-		let checkQtys = (qtyInput.elements[1].value !== "" || qtyInput.elements[2].value !== "");
+		let checkQtys = (qtyInput.elements[qtyInputNoDateAdjustment(1)].value !== "" || qtyInput.elements[qtyInputNoDateAdjustment(2)].value !== "");
 		if (isQty && checkQtys) {
-			let qty1 = qtyInput.elements[1].value !== "" ? parseInt(qtyInput.elements[1].value) : 0;
-			let qty2 = qtyInput.elements[2].value !== "" ? parseInt(qtyInput.elements[2].value) : 0;
+			let qty1 = qtyInput.elements[qtyInputNoDateAdjustment(1)].value !== "" ? parseInt(qtyInput.elements[qtyInputNoDateAdjustment(1)].value) : 0;
+			let qty2 = qtyInput.elements[qtyInputNoDateAdjustment(2)].value !== "" ? parseInt(qtyInput.elements[qtyInputNoDateAdjustment(2)].value) : 0;
 			let partFormat = (await getFile("PartFields.html")).data;
 			function splice (string, index, insert) {
 				let a = string.slice(0, index);
@@ -260,7 +275,7 @@ async function autoSetupByProd() {
 	updateHistory.innerHTML = lastUpdate.data;
 
 	// find the number of parts coming in and out based on the prod number
-	let bom = await getBOMFromProd(qtyInput.elements[0].value);
+	let bom = await getBOMFromProd(qtyInput.elements[qtyInputNoDateAdjustment(0)].value);
 	let partsOutQty = 0;
 	let partsInQty = 0;
 
@@ -279,8 +294,8 @@ async function autoSetupByProd() {
 	bom.forEach(bomObject => {
 		if (bomObject.qty > 0) {
 			if (stringInWCList(bomObject.itemNum,["M6*","M9*","T8*","9880231*","M71*"])) {
-				qtyInput.elements[3].value = bomObject.itemNum;
-				qtyInput.elements[4].value = bomObject.make;
+				qtyInput.elements[qtyInputNoDateAdjustment(3)].value = bomObject.itemNum;
+				qtyInput.elements[qtyInputNoDateAdjustment(4)].value = bomObject.make;
 				return;
 			}
 			partsInQty += 1;
@@ -290,8 +305,8 @@ async function autoSetupByProd() {
 		}
 	});
 
-	qtyInput.elements[1].value = partsOutQty;
-	qtyInput.elements[2].value = partsInQty;
+	qtyInput.elements[qtyInputNoDateAdjustment(1)].value = partsOutQty;
+	qtyInput.elements[qtyInputNoDateAdjustment(2)].value = partsInQty;
 	await qtyUpdate(document.createEvent('Event'));
 
 	// store the part input field dom elements in arrays
