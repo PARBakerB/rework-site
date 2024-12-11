@@ -26,7 +26,7 @@ async function createPdf(data) {
 	let serialBarcode = null;
 	switch (data.label) {
 		case 'Phase 1801':
-			let jpgFile = await fsm.read('./database/PAR_PHASE_TM.jpg');
+			let jpgFile = await fsm.read('/AzureFileShare/Database/PAR_PHASE_TM.jpg');
 			tm_stream = await pdfDoc.embedJpg(jpgFile);
 	}
 	const modelBarcode = await pdfDoc.embedPng(canvasStream(data.model, 1));

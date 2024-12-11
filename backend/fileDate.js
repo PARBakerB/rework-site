@@ -1,7 +1,7 @@
 import constants from "./constants.js"
 const fsm = constants.fsManager;
 
-const LOGPATH = "./frontend/logs/";
+const LOGPATH = "/AzureFileShare/Logs/";
 
 function dateConverter (date) {
     let dateArray = date.split("/");

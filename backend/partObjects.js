@@ -3,12 +3,12 @@ const fsm = constants.fsManager;
 
 import { dateConverter } from './fileDate.js';
 
-const MFG_PARTS_FILE = './database/Manufacturer-part-numbers.csv';
-const PROD_BOMS_FILE = './database/prodboms.json';
-const PART_DESCRIPTIONS_FILE = './database/searchNames.json';
-const PROD_HEADERS_FILE = './database/prodheaders.json';
-const LOAD_LOG_FILE = './database/LoadLog.csv';
-const FW_LOG_FILE = './database/PARWaveNoSW.csv';
+const MFG_PARTS_FILE = '/AzureFileShare/Database/Manufacturer-part-numbers.csv';
+const PROD_BOMS_FILE = '/AzureFileShare/Database/prodboms.json';
+const PART_DESCRIPTIONS_FILE = '/AzureFileShare/Database/searchNames.json';
+const PROD_HEADERS_FILE = '/AzureFileShare/Database/prodheaders.json';
+const LOAD_LOG_FILE = '/AzureFileShare/Database/LoadLog.csv';
+const FW_LOG_FILE = '/AzureFileShare/Database/PARWaveNoSW.csv';
 
 const BAD_BOM_ITEMS = ['754*', '755*', '893*', '713*', '772*', '850*', '262*', 'F*', 'CS*', 'SS*'];
 

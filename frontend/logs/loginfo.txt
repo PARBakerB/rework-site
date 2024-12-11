@@ -1,5 +1,0 @@
-This folder holds the output of the tool.
-
-Log files are labeled by the date that the server was last launched.
-A new log file is created every time the server is run.
-All outputs are added to that file until the server is stopped and started again.
