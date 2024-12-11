@@ -11,7 +11,7 @@ import constants from "./backend/constants.js"
 const fsm = constants.fsManager;
 
 process.env.TZ = 'EST5EDT';
-const PORT = 9615;
+const PORT = process.env.PORT || 9615;
 const MIME_TYPES = {
   default: 'application/octet-stream',
   html: 'text/html; charset=UTF-8',
