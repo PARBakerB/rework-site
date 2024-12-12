@@ -1,11 +1,12 @@
 import * as https from 'node:https';
 import * as http from 'node:http';
-import * as path from 'node:path';
+//import * as path from 'node:path';
 import * as fs from 'node:fs';
 
 import { combineLogs } from './backend/fileDate.js';
 import { getMFG, getBOMFromProd, getSearchName, waveSerialSearch } from './backend/partObjects.js';
 import { createPdf } from './backend/pdf.js';
+import { fileExtension } from './backend/utils.js';
 
 import constants from "./backend/constants.js"
 const fsm = constants.fsManager;
@@ -28,9 +29,10 @@ const MIME_TYPES = {
   mp3: 'audio/mp3',
   pdf: 'application/pdf'
 };
-const STATIC_PATH = path.join(process.cwd(), './frontend');
-const DATABASE_PATH = "/AzureFileShare/Database"
-const logFileName = STATIC_PATH + '/AzureFileShare/Logs/rework_' + Date().slice(0,-39).replace(/ /g, "_").replace(/:/g, "-") + '.csv';
+//const STATIC_PATH = path.join(process.cwd(), './frontend');
+const STATIC_PATH = "./frontend";
+const DATABASE_PATH = "/AzureFileShare/Database";
+const logFileName = '/AzureFileShare/Logs/rework_' + Date().slice(0,-39).replace(/ /g, "_").replace(/:/g, "-") + '.csv';
 var lastUpdate = Date().toString().slice(4,10) + " " + Date().toString().slice(13,15) + " at " + Date().toString().slice(16,21) + " EST";
 
 const toBool = [() => true, () => false];
@@ -63,18 +65,20 @@ const getResponse = async (url) => {
 		const found = true;
 		//const paths = [STATIC_PATH, '/logs/', 'Rework_Log_Combined.csv'];
 		const filePath = "/AzureFileShare/Logs/" + "Rework_Log_Combined.csv"
-		const ext = path.extname(filePath).substring(1);
+		//const ext = path.extname(filePath).substring(1);
+		const ext = fileExtension(filePath);
 		const stream = await fsm.readStream(filePath);
 		return { found, ext, stream };
 	} else {
-		const paths = [STATIC_PATH, url];
-		if (url.endsWith('/')) paths.push('index.html');
-		const filePath = path.join(...paths);
+		//const paths = [STATIC_PATH, url];
+		let paths = STATIC_PATH + url;
+		if (url.endsWith('/')) paths += 'index.html'; //paths.push("index.html");
+		const filePath = paths;//path.join(...paths);
 		const pathTraversal = !filePath.startsWith(STATIC_PATH);
 		const exists = await fsm.access(filePath).then(...toBool);
 		const found = !pathTraversal && exists;
 		const streamPath = found ? filePath : STATIC_PATH + '/404.html';
-		const ext = path.extname(streamPath).substring(1).toLowerCase();
+		const ext = fileExtension(streamPath);
 		const stream = await fsm.readStream(streamPath);
 		return { found, ext, stream };
 	}
@@ -83,8 +87,8 @@ const postResponse = async (req, res) => {
 	fsm.append(logFileName, req.url.substring(1) + '\n', function (err) {if (err) throw err;});
 	const found = true;
 	const ext = 'html';
-	const streamPath = [STATIC_PATH, '/', 'index.html'];
-	const stream = await fsm.readStream(path.join(...streamPath));
+	const streamPath = STATIC_PATH + '/' + 'index.html';//[STATIC_PATH, '/', 'index.html'];
+	const stream = await fsm.readStream(streamPath);//path.join(...streamPath);
 	return { found, ext, stream };
 };
 const fileServ = async (req, res) => {
