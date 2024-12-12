@@ -3,6 +3,9 @@
   "version": "1.A",
   "description": "TS-2760 NODE JS TERMINAL RECONFIGURATION SITE",
   "main": "terminal-rework-site.js",
+  "scripts": {
+    "start": "node terminal-rework-site.js"
+  },
   "keywords": [],
   "author": "Brett Baker",
   "license": "ISC",
