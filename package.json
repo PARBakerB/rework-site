@@ -4,7 +4,6 @@
   "description": "TS-2760 NODE JS TERMINAL RECONFIGURATION SITE",
   "main": "terminal-rework-site.js",
   "scripts": {
-    "nohup": "nohup node terminal-rework-site.js &",
     "start": "node terminal-rework-site.js"
   },
   "keywords": [],
@@ -14,6 +13,7 @@
   "dependencies": {
     "canvas": "^3.0.0-rc3",
     "jsbarcode": "^3.11.5",
-    "pdf-lib": "^1.17.1"
+    "pdf-lib": "^1.17.1",
+    "pug": "^3.0.3"
   }
 }

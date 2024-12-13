@@ -1,11 +1,13 @@
 import * as https from 'node:https';
 import * as http from 'node:http';
-import * as path from 'node:path';
+//import * as path from 'node:path';
 import * as fs from 'node:fs';
 
 import { combineLogs } from './backend/fileDate.js';
 import { getMFG, getBOMFromProd, getSearchName, waveSerialSearch } from './backend/partObjects.js';
 import { createPdf } from './backend/pdf.js';
+import { fileExtension } from './backend/utils.js';
+import { compilePug } from './backend/pugCompiler.js';
 
 import constants from "./backend/constants.js"
 const fsm = constants.fsManager;
@@ -28,9 +30,10 @@ const MIME_TYPES = {
   mp3: 'audio/mp3',
   pdf: 'application/pdf'
 };
-const STATIC_PATH = path.join(process.cwd(), './frontend');
-const DATABASE_PATH = path.join(process.cwd(), './database');
-const logFileName = STATIC_PATH + '/logs/rework_' + Date().slice(0,-39).replace(/ /g, "_").replace(/:/g, "-") + '.csv';
+//const STATIC_PATH = path.join(process.cwd(), './frontend');
+const STATIC_PATH = "./frontend";
+const DATABASE_PATH = "/AzureFileShare/Database";
+const logFileName = '/AzureFileShare/Logs/rework_' + Date().slice(0,-39).replace(/ /g, "_").replace(/:/g, "-") + '.csv';
 var lastUpdate = Date().toString().slice(4,10) + " " + Date().toString().slice(13,15) + " at " + Date().toString().slice(16,21) + " EST";
 
 const toBool = [() => true, () => false];
@@ -61,20 +64,22 @@ const getResponse = async (url) => {
 	if (url.endsWith('log.csv')) {
 		await combineLogs();
 		const found = true;
-		const paths = [STATIC_PATH, '/logs/', 'Rework_Log_Combined.csv'];
-		const filePath = path.join(...paths);
-		const ext = path.extname(filePath).substring(1);
+		//const paths = [STATIC_PATH, '/logs/', 'Rework_Log_Combined.csv'];
+		const filePath = "/AzureFileShare/Logs/" + "Rework_Log_Combined.csv"
+		//const ext = path.extname(filePath).substring(1);
+		const ext = fileExtension(filePath);
 		const stream = await fsm.readStream(filePath);
 		return { found, ext, stream };
-	} else {
-		const paths = [STATIC_PATH, url];
-		if (url.endsWith('/')) paths.push('index.html');
-		const filePath = path.join(...paths);
+	}  else {
+		//const paths = [STATIC_PATH, url];
+		let paths = STATIC_PATH + url;
+		if (url.endsWith('/')) paths += 'index.html'; //paths.push("index.html");
+		const filePath = paths;//path.join(...paths);
 		const pathTraversal = !filePath.startsWith(STATIC_PATH);
 		const exists = await fsm.access(filePath).then(...toBool);
 		const found = !pathTraversal && exists;
 		const streamPath = found ? filePath : STATIC_PATH + '/404.html';
-		const ext = path.extname(streamPath).substring(1).toLowerCase();
+		const ext = fileExtension(streamPath);
 		const stream = await fsm.readStream(streamPath);
 		return { found, ext, stream };
 	}
@@ -83,11 +88,14 @@ const postResponse = async (req, res) => {
 	fsm.append(logFileName, req.url.substring(1) + '\n', function (err) {if (err) throw err;});
 	const found = true;
 	const ext = 'html';
-	const streamPath = [STATIC_PATH, '/', 'index.html'];
-	const stream = await fsm.readStream(path.join(...streamPath));
+	const streamPath = STATIC_PATH + '/' + 'index.html';//[STATIC_PATH, '/', 'index.html'];
+	const stream = await fsm.readStream(streamPath);//path.join(...streamPath);
 	return { found, ext, stream };
 };
 const fileServ = async (req, res) => {
+	const pug_path = STATIC_PATH + req.url + ".pug";
+	const pug_path_exists = await fsm.access(pug_path).then(...toBool);
+	//console.log(pug_path + "exists?" + pug_path_exists);
 	if (req.url === '/420getMFG420') {
 		let response = "";
 		req.on('data', async j => {
@@ -203,8 +211,8 @@ const fileServ = async (req, res) => {
 		});
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
-			await fsm.append('./database/LoadLog.csv', response + '\r\n');
-			//let log = await fsm.read('./database/LoadLog.csv');
+			await fsm.append('/AzureFileShare/Database/LoadLog.csv', response + '\r\n');
+			//let log = await fsm.read('/AzureFileShare/Database/LoadLog.csv');
 			res.write("Log Received");
 			res.end();
 		});
@@ -230,13 +238,31 @@ const fileServ = async (req, res) => {
 			if (Array.isArray(inputData)) {
 				inputData.forEach(serial => {
 					let logString = serial + ",,,,1";
-					fsm.append('./database/PARWaveNoSW.csv', logString + '\r\n');
+					fsm.append('/AzureFileShare/Database/PARWaveNoSW.csv', logString + '\r\n');
 				});
 			} else {
 				let logString = inputData + ",,,,1";
-				fsm.append('./database/PARWaveNoSW.csv', logString + '\r\n');
+				fsm.append('/AzureFileShare/Database/PARWaveNoSW.csv', logString + '\r\n');
 			}
 			res.write("Log Received");
+			res.end();
+		});
+	} else if (pug_path_exists) {
+		let reqData = '';
+		req.on('data', data => {
+			reqData = data;
+		});
+		req.on('end', () => {
+			res.writeHead(200, { 'Content-Type': MIME_TYPES["html"] });
+			let options = reqData ? { // replace this with a database query using the reqData serial
+				model: "M7150",
+				serial: reqData,
+				peripherals: "card reader",
+				firmware: "v1.1",
+				warrantyDate: "October 2023"
+			} : {};
+			let htmlContent = compilePug(pug_path, options);
+			res.write(htmlContent);
 			res.end();
 		});
 	} else {
