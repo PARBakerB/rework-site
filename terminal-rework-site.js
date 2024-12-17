@@ -1,6 +1,7 @@
 import * as https from 'node:https';
 import * as http from 'node:http';
 //import * as path from 'node:path';
+//import * as path from 'node:path';
 import * as fs from 'node:fs';
 
 import { combineLogs } from './backend/fileDate.js';
@@ -30,6 +31,10 @@ const MIME_TYPES = {
   mp3: 'audio/mp3',
   pdf: 'application/pdf'
 };
+//const STATIC_PATH = path.join(process.cwd(), './frontend');
+const STATIC_PATH = "./frontend";
+const DATABASE_PATH = "/AzureFileShare/Database";
+const logFileName = '/AzureFileShare/Logs/rework_' + Date().slice(0,-39).replace(/ /g, "_").replace(/:/g, "-") + '.csv';
 //const STATIC_PATH = path.join(process.cwd(), './frontend');
 const STATIC_PATH = "./frontend";
 const DATABASE_PATH = "/AzureFileShare/Database";
@@ -68,6 +73,10 @@ const getResponse = async (url) => {
 		const filePath = "/AzureFileShare/Logs/" + "Rework_Log_Combined.csv"
 		//const ext = path.extname(filePath).substring(1);
 		const ext = fileExtension(filePath);
+		//const paths = [STATIC_PATH, '/logs/', 'Rework_Log_Combined.csv'];
+		const filePath = "/AzureFileShare/Logs/" + "Rework_Log_Combined.csv"
+		//const ext = path.extname(filePath).substring(1);
+		const ext = fileExtension(filePath);
 		const stream = await fsm.readStream(filePath);
 		return { found, ext, stream };
 	}  else {
@@ -80,6 +89,7 @@ const getResponse = async (url) => {
 		const found = !pathTraversal && exists;
 		const streamPath = found ? filePath : STATIC_PATH + '/404.html';
 		const ext = fileExtension(streamPath);
+		const ext = fileExtension(streamPath);
 		const stream = await fsm.readStream(streamPath);
 		return { found, ext, stream };
 	}
@@ -88,6 +98,8 @@ const postResponse = async (req, res) => {
 	fsm.append(logFileName, req.url.substring(1) + '\n', function (err) {if (err) throw err;});
 	const found = true;
 	const ext = 'html';
+	const streamPath = STATIC_PATH + '/' + 'index.html';//[STATIC_PATH, '/', 'index.html'];
+	const stream = await fsm.readStream(streamPath);//path.join(...streamPath);
 	const streamPath = STATIC_PATH + '/' + 'index.html';//[STATIC_PATH, '/', 'index.html'];
 	const stream = await fsm.readStream(streamPath);//path.join(...streamPath);
 	return { found, ext, stream };
@@ -213,6 +225,8 @@ const fileServ = async (req, res) => {
 			res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
 			await fsm.append('/AzureFileShare/Database/LoadLog.csv', response + '\r\n');
 			//let log = await fsm.read('/AzureFileShare/Database/LoadLog.csv');
+			await fsm.append('/AzureFileShare/Database/LoadLog.csv', response + '\r\n');
+			//let log = await fsm.read('/AzureFileShare/Database/LoadLog.csv');
 			res.write("Log Received");
 			res.end();
 		});
@@ -239,9 +253,11 @@ const fileServ = async (req, res) => {
 				inputData.forEach(serial => {
 					let logString = serial + ",,,,1";
 					fsm.append('/AzureFileShare/Database/PARWaveNoSW.csv', logString + '\r\n');
+					fsm.append('/AzureFileShare/Database/PARWaveNoSW.csv', logString + '\r\n');
 				});
 			} else {
 				let logString = inputData + ",,,,1";
+				fsm.append('/AzureFileShare/Database/PARWaveNoSW.csv', logString + '\r\n');
 				fsm.append('/AzureFileShare/Database/PARWaveNoSW.csv', logString + '\r\n');
 			}
 			res.write("Log Received");

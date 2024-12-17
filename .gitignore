@@ -2,6 +2,8 @@
 STAR_partech_com.*
 
 #databaseFiles
+/AzureFileShare/Database/*.json
+/AzureFileShare/Database/*.csv
 database/*.json
 database/*.csv
 
@@ -17,6 +19,7 @@ ref_json/
 **/frontend/cycle.pdf
 
 # Logs
+/AzureFileShare/Logs/*.csv
 **/frontend/logs/*.csv
 **/frontend/*.csv
 *.log
