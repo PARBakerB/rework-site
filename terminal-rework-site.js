@@ -35,10 +35,6 @@ const MIME_TYPES = {
 const STATIC_PATH = "./frontend";
 const DATABASE_PATH = "/AzureFileShare/Database";
 const logFileName = '/AzureFileShare/Logs/rework_' + Date().slice(0,-39).replace(/ /g, "_").replace(/:/g, "-") + '.csv';
-//const STATIC_PATH = path.join(process.cwd(), './frontend');
-const STATIC_PATH = "./frontend";
-const DATABASE_PATH = "/AzureFileShare/Database";
-const logFileName = '/AzureFileShare/Logs/rework_' + Date().slice(0,-39).replace(/ /g, "_").replace(/:/g, "-") + '.csv';
 var lastUpdate = Date().toString().slice(4,10) + " " + Date().toString().slice(13,15) + " at " + Date().toString().slice(16,21) + " EST";
 
 const toBool = [() => true, () => false];
@@ -73,10 +69,6 @@ const getResponse = async (url) => {
 		const filePath = "/AzureFileShare/Logs/" + "Rework_Log_Combined.csv"
 		//const ext = path.extname(filePath).substring(1);
 		const ext = fileExtension(filePath);
-		//const paths = [STATIC_PATH, '/logs/', 'Rework_Log_Combined.csv'];
-		const filePath = "/AzureFileShare/Logs/" + "Rework_Log_Combined.csv"
-		//const ext = path.extname(filePath).substring(1);
-		const ext = fileExtension(filePath);
 		const stream = await fsm.readStream(filePath);
 		return { found, ext, stream };
 	}  else {
@@ -89,7 +81,6 @@ const getResponse = async (url) => {
 		const found = !pathTraversal && exists;
 		const streamPath = found ? filePath : STATIC_PATH + '/404.html';
 		const ext = fileExtension(streamPath);
-		const ext = fileExtension(streamPath);
 		const stream = await fsm.readStream(streamPath);
 		return { found, ext, stream };
 	}
@@ -98,8 +89,6 @@ const postResponse = async (req, res) => {
 	fsm.append(logFileName, req.url.substring(1) + '\n', function (err) {if (err) throw err;});
 	const found = true;
 	const ext = 'html';
-	const streamPath = STATIC_PATH + '/' + 'index.html';//[STATIC_PATH, '/', 'index.html'];
-	const stream = await fsm.readStream(streamPath);//path.join(...streamPath);
 	const streamPath = STATIC_PATH + '/' + 'index.html';//[STATIC_PATH, '/', 'index.html'];
 	const stream = await fsm.readStream(streamPath);//path.join(...streamPath);
 	return { found, ext, stream };
@@ -273,7 +262,7 @@ const fileServ = async (req, res) => {
 			let options = reqData ? { // replace this with a database query using the reqData serial
 				model: "M7150",
 				serial: reqData,
-				peripherals: "card reader",
+				components: "card reader",
 				firmware: "v1.1",
 				warrantyDate: "October 2023"
 			} : {};

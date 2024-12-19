@@ -5,7 +5,6 @@ html(lang="en")
     meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
     meta(name="description", content="")
     meta(name="author", content="")
-    //- link(rel="icon", href="https://getbootstrap.com/docs/4.0/assets/img/favicons/favicon.ico")
     link(rel="icon", href="./favicon.ico")
     title Product Info
     link(rel="canonical", href="https://getbootstrap.com/docs/4.0/examples/navbar-fixed/")
@@ -39,11 +38,11 @@ html(lang="en")
         h1 System Hardware Info
         p.lead Enter a product serial into the search bar above. The system details will appear below.
         .d-flex
-          a.btn.btn-lg.btn-primary(href="https://support.partech.com/documentation/", role="button") View product docs »
+          a.btn.btn-lg.btn-primary(href="https://support.partech.com/documentation/", role="button") View support docs »
           a.btn.btn-lg.btn-danger.ml-auto(href="https://support.partech.com/documentation/", role="button") Export list to csv »
       ul.list-unstyled.m-0.p-0
         .row#cards-list
-          li.col-md-4.mb-4.sample
+          li.col-md-3.mb-3.sample
             .card
               img.card-img-top(alt="Card image cap" src="https://support.partech.com/wp-content/uploads/2023/11/PAR-Logo-NB-blue-65492e1d8e588.svg")
               .card-body
@@ -51,11 +50,11 @@ html(lang="en")
                 p.card-text
                   | Serial
                   br
-                  | Peripherals:
-                  br
-                  | Firmware Version:
-                  br
-                  | Warranty ends:
+                  | Components:
+                  //br
+                  //| Firmware Version:
+                  //br
+                  //| Warranty ends:
     // Bootstrap core JavaScript
     // Placed at the end of the document so the pages load faster
     script(src="./bootstrap-page-files/jquery-3.2.1.slim.min.js", integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN", crossorigin="anonymous")
