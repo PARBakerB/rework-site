@@ -193,7 +193,7 @@ const fileServ = async (req, res) => {
 			res.write("cycle.pdf");
 			res.end();
 		});
-	}else if (req.url === "/Service-Repair-Label") {
+	}else if (req.url === "/Advance-Exchange-Label") {
 		let response = "";
 		req.on('data', async j => {
 			response = JSON.parse(j.toString('utf8'));
@@ -201,8 +201,8 @@ const fileServ = async (req, res) => {
 		req.on('end', async () => {
 			res.writeHead(200, { 'Content-Type': MIME_TYPES['pdf'] });
 			let pdfData = await createPdf(response);
-			await fsm.write('./frontend/SRL.pdf', pdfData);
-			res.write("SRL.pdf");
+			await fsm.write('./frontend/AE.pdf', pdfData);
+			res.write("AE.pdf");
 			res.end();
 		});
 	} else if (req.url === "/CTOLoadLog") {
